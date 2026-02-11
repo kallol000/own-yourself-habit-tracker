@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:own_yourself/utils/colors.dart';
 
 class Habit extends StatelessWidget {
-  const Habit({super.key});
+  final String title;
+  const Habit({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class Habit extends StatelessWidget {
         children: [
           Icon(Icons.fitness_center, color: AppColors.surfaceColor),
           Text(
-            "Exercise",
+            title,
             style: TextStyle(
               color: AppColors.surfaceColor,
               fontWeight: FontWeight.bold,
