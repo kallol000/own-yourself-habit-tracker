@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
-class NewHabitForm extends StatelessWidget {
-  const NewHabitForm({super.key});
+class NewHabitForm extends StatefulWidget {
+  void Function(String) submitAction;
+  NewHabitForm({super.key, required this.submitAction});
 
+  @override
+  State<NewHabitForm> createState() => _NewHabitFormState();
+}
+
+class _NewHabitFormState extends State<NewHabitForm> {
+  TextEditingController habitNameController = TextEditingController();
+  
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -13,8 +21,12 @@ class NewHabitForm extends StatelessWidget {
           
           children: [
             TextField(
+              controller: habitNameController,
               decoration: InputDecoration(border: OutlineInputBorder(), hintText: 'Habit'),
-            )
+            ),
+            MaterialButton(onPressed: () {
+              widget.submitAction(habitNameController.text);
+            },child: Text('Submit'),)
           ],
         ),
       ),

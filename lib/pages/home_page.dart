@@ -14,8 +14,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   void createNewHabit(){
     showDialog(context: context, builder: (context){
-      return NewHabitForm();
+      return NewHabitForm(submitAction: addNewHabit,);
     },);
+  }
+
+  void addNewHabit(String habitName){
+    setState(() {
+      data.add(habitName);
+      Navigator.pop(context);
+    });
   }
 
   @override
@@ -30,9 +37,11 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(itemBuilder: (context, index) {
+        child: ListView.separated(itemBuilder: (context, index) {
           return Habit(title: data[index]);
-        },itemCount: data.length,),
+        }, separatorBuilder: (context, index) {
+          return SizedBox(height: 10,);
+        }, itemCount: data.length),
       ),
     );
   }
