@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:own_yourself/utils/colors.dart';
 
-class Habit extends StatelessWidget {
+class HabitCard extends StatelessWidget {
   final String title;
-  const Habit({super.key, required this.title});
+  const HabitCard({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      tileColor: AppColors.accentColor,
-      textColor: AppColors.surfaceColor,
+      tileColor: AppColors.backgroundColor,
       title: Row(
         spacing: 10.0,
         children: [
