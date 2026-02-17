@@ -1,5 +1,4 @@
 import 'package:own_yourself/utils/types.dart';
-import 'package:uuid/uuid.dart';
 
 List<Habit> data = [
   Habit(

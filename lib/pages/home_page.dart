@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:own_yourself/utils/colors.dart';
+import 'package:own_yourself/data/habit_database.dart';
+import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/types.dart';
 import 'package:own_yourself/widgets/habit_card.dart';
 import 'package:own_yourself/widgets/new_habit_form.dart';
 import '../utils/data.dart';
-import 'package:uuid/uuid.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,16 +24,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void addNewHabit(String habitName) {
+  Future<void> addNewHabit(Habit habit) async {
+    
     var newHabit = Habit(
-      id: Uuid().v4(),
-      title: habitName,
-      repetitionType: HabitRepetitionType.daily,
-      repetitionTimes: 1,
+      id: habit.id,
+      title: habit.title,
+      repetitionType: habit.repetitionType,
+      repetitionTimes: habit.repetitionTimes,
       startDate: DateTime.now(),
       endDate: DateTime.now().add(Duration(days: 30)),
     );
 
+    final id = await HabitDatabase.instance.insertHabit(habit);
     setState(() {
       data.add(newHabit);
       Navigator.pop(context);

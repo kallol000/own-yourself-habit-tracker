@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:own_yourself/utils/colors.dart';
+import 'package:own_yourself/utils/consts.dart';
 
 class HabitCard extends StatelessWidget {
   final String title;

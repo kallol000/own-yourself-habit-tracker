@@ -8,3 +8,6 @@ class AppColors {
   static const Color surfaceColor = Colors.white;
   static const Color errorColor = Color(0xFFB00020);
 }
+
+final double globalRadius = 10;
+final double buttonRadius = 5;

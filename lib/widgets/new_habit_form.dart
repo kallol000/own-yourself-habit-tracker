@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:own_yourself/utils/colors.dart';
+import 'package:own_yourself/utils/consts.dart';
+import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:own_yourself/utils/types.dart';
+import 'package:uuid/uuid.dart';
 
 class NewHabitForm extends StatefulWidget {
-  void Function(String) submitAction;
+  Future<void> Function(Habit) submitAction;
   NewHabitForm({super.key, required this.submitAction});
 
   @override
@@ -63,9 +65,10 @@ class _NewHabitFormState extends State<NewHabitForm> {
   Widget build(BuildContext context) {
     return AlertDialog(
       content: Container(
-        width: 500,
-        height: 500,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(2.0)),
+        width: 400,
+        height: 400,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(0.0)),
+        
         child: Column(
           spacing: 20,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,42 +78,41 @@ class _NewHabitFormState extends State<NewHabitForm> {
               style: TextStyle(color: AppColors.backgroundColor),
 
               controller: habitNameController,
-              decoration: InputDecoration(hintText: 'Habit'),
+              decoration: InputDecoration(hintText: 'Excercise'),
             ),
 
             Row(
+              spacing: 10,
               children: [
-                CupertinoButton(
-                  child: Text(
-                    HabitRepetitionTimes[selectedRepetitionTimes]
-                        .toString()
-                        .split('.')
-                        .last,
-                  ),
+                if (selectedRepetitionType != 0)
+                  CupertinoButton(
+                    child: Text((selectedRepetitionTimes + 1).toString()),
 
-                  onPressed: () {
-                    return showRepetitionTypePicker(
-                      CupertinoPicker(
-                        scrollController: FixedExtentScrollController(
-                          initialItem: selectedRepetitionTimes,
+                    onPressed: () {
+                      return showRepetitionTimesPicker(
+                        CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                            initialItem: selectedRepetitionTimes,
+                          ),
+                          itemExtent: 32,
+                          onSelectedItemChanged: (value) {
+                            setState(() {
+                              selectedRepetitionTimes = value;
+                            });
+                          },
+                          children: habitTimeOptions(
+                            HabitRepetitionType.values[selectedRepetitionType],
+                          ).map((e) => Text(e.toString())).toList(),
                         ),
-                        itemExtent: 32,
-                        onSelectedItemChanged: (value) {
-                          setState(() {
-                            selectedRepetitionTimes = value;
-                          });
-                        },
-                        children: [...HabitRepetitionTimes]
-                            .map((e) => Text(e.toString().split('.').last))
-                            .toList(),
-                      ),
-                    );
-                  },
-                ),
-                Text('time(s)', style: TextStyle(fontSize: 16)),
+                      );
+                    },
+                  ),
+                if (selectedRepetitionType != 0)
+                  Text('time(s)', style: TextStyle(fontSize: 16)),
                 CupertinoButton(
                   child: Text(
-                    HabitRepetitionType.values[selectedRepetitionType]
+                    habitRepetitionTypeNames.values
+                        .elementAt(selectedRepetitionType)
                         .toString()
                         .split('.')
                         .last,
@@ -138,11 +140,22 @@ class _NewHabitFormState extends State<NewHabitForm> {
               ],
             ),
 
-            FilledButton(
-              onPressed: () {
-                widget.submitAction(habitNameController.text);
-              },
-              child: Text('Start'),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  var newHabit = Habit(
+                    id: Uuid().v4(),
+                    title: habitNameController.text,
+                    repetitionType:
+                        HabitRepetitionType.values[selectedRepetitionType],
+                    startDate: DateTime.now(),
+                    endDate: DateTime(2099),
+                  );
+                  // widget.submitAction(newHabit);
+                },
+                child: Text('Start'),
+              ),
             ),
           ],
         ),
