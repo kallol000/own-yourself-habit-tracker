@@ -145,14 +145,14 @@ class _NewHabitFormState extends State<NewHabitForm> {
               child: FilledButton(
                 onPressed: () {
                   var newHabit = Habit(
-                    id: Uuid().v4(),
+                    // id: Uuid().v4(),
                     title: habitNameController.text,
                     repetitionType:
                         HabitRepetitionType.values[selectedRepetitionType],
                     startDate: DateTime.now(),
                     endDate: DateTime(2099),
                   );
-                  // widget.submitAction(newHabit);
+                  widget.submitAction(newHabit);
                 },
                 child: Text('Start'),
               ),

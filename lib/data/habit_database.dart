@@ -18,11 +18,7 @@ class HabitDatabase {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
@@ -47,8 +43,11 @@ class HabitDatabase {
     );
   }
 
-  Future<List<Map<String, dynamic>>> getAllHabits() async {
+  Future<List<Habit>> getAllHabits() async {
     final db = await instance.database;
-    return await db.query('habits');
+
+    final result = await db.query('habits');
+
+    return result.map((map) => Habit.fromMap(map)).toList();
   }
 }
