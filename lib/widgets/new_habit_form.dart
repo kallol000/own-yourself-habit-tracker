@@ -6,7 +6,7 @@ import 'package:own_yourself/utils/types.dart';
 import 'package:uuid/uuid.dart';
 
 class NewHabitForm extends StatefulWidget {
-  Future<void> Function(Habit) submitAction;
+  Future<void> Function(HabitEntity) submitAction;
   NewHabitForm({super.key, required this.submitAction});
 
   @override
@@ -144,7 +144,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () {
-                  var newHabit = Habit(
+                  var newHabit = HabitEntity(
                     // id: Uuid().v4(),
                     title: habitNameController.text,
                     repetitionType:
