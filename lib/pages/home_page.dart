@@ -5,7 +5,6 @@ import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/types.dart';
 import 'package:own_yourself/widgets/habit_card.dart';
 import 'package:own_yourself/widgets/new_habit_form.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

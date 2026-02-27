@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:own_yourself/utils/types.dart';
-import 'package:uuid/uuid.dart';
 
 class NewHabitForm extends StatefulWidget {
-  Future<void> Function(HabitEntity) submitAction;
-  NewHabitForm({super.key, required this.submitAction});
+  final Future<void> Function(HabitEntity) submitAction;
+  const NewHabitForm({super.key, required this.submitAction});
 
   @override
   State<NewHabitForm> createState() => _NewHabitFormState();
@@ -68,7 +67,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
         width: 400,
         height: 400,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(0.0)),
-        
+
         child: Column(
           spacing: 20,
           crossAxisAlignment: CrossAxisAlignment.start,

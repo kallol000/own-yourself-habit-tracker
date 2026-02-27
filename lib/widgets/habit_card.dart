@@ -1,19 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
+import 'package:own_yourself/widgets/confirmation_popup.dart';
 
 class HabitCard extends StatefulWidget {
   final int habitId;
   final String title;
-  Future<void> Function(int id) deleteExistingHabit;
-  HabitCard({super.key, required this.title, required this.deleteExistingHabit,required this.habitId});
+  final Future<void> Function(int id) deleteExistingHabit;
+  const HabitCard({
+    super.key,
+    required this.title,
+    required this.deleteExistingHabit,
+    required this.habitId,
+  });
 
   @override
   State<HabitCard> createState() => _HabitCardState();
 }
 
 class _HabitCardState extends State<HabitCard> {
+  void deleteHabit(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ConfirmationPopup(
+          id: widget.habitId,
+          deleteExistingHabit: widget.deleteExistingHabit,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +38,7 @@ class _HabitCardState extends State<HabitCard> {
         motion: ScrollMotion(),
         children: [
           SlidableAction(
-            onPressed: (context) {
-              widget.deleteExistingHabit(widget.habitId);
-            },
+            onPressed: deleteHabit,
             backgroundColor: AppColors.errorColor,
             foregroundColor: Colors.white,
             icon: Icons.delete,
