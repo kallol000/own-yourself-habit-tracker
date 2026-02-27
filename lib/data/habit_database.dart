@@ -73,7 +73,7 @@ class HabitDatabase {
     }
   }
 
-  Future<int> insertHabit(Habit habit) async {
+  Future<int> insertHabit(HabitEntity habit) async {
     final db = await instance.database;
     return await db.insert(
       'habits',
@@ -82,11 +82,11 @@ class HabitDatabase {
     );
   }
 
-  Future<List<Habit>> getAllHabits() async {
+  Future<List<HabitEntity>> getAllHabits() async {
     final db = await instance.database;
 
     final result = await db.query('habits');
 
-    return result.map((map) => Habit.fromMap(map)).toList();
+    return result.map((map) => HabitEntity.fromMap(map)).toList();
   }
 }

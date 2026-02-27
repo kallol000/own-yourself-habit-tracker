@@ -1,4 +1,4 @@
-class Habit {
+class HabitEntity {
   final int? id;
   final String title;
   final HabitRepetitionType repetitionType;
@@ -6,7 +6,7 @@ class Habit {
   final DateTime startDate;
   final DateTime? endDate;
 
-  Habit({
+  HabitEntity({
     this.id,
     required this.title,
     required this.repetitionType,
@@ -26,8 +26,8 @@ class Habit {
     };
   }
 
-  factory Habit.fromMap(Map<String, dynamic> map) {
-    return Habit(
+  factory HabitEntity.fromMap(Map<String, dynamic> map) {
+    return HabitEntity(
       id: map['id'] as int?,
       title: map['title'] as String,
       repetitionType: HabitRepetitionType.values.firstWhere(

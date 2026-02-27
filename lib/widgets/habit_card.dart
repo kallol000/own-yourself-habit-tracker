@@ -1,43 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:own_yourself/utils/consts.dart';
+import 'package:own_yourself/widgets/confirmation_popup.dart';
 
-class HabitCard extends StatelessWidget {
+class HabitCard extends StatefulWidget {
+  final int habitId;
   final String title;
-  const HabitCard({super.key, required this.title});
+  final Future<void> Function(int id) deleteExistingHabit;
+  const HabitCard({
+    super.key,
+    required this.title,
+    required this.deleteExistingHabit,
+    required this.habitId,
+  });
+
+  @override
+  State<HabitCard> createState() => _HabitCardState();
+}
+
+class _HabitCardState extends State<HabitCard> {
+  void deleteHabit(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ConfirmationPopup(
+          id: widget.habitId,
+          deleteExistingHabit: widget.deleteExistingHabit,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      tileColor: AppColors.backgroundColor,
-      title: Row(
-        spacing: 10.0,
+    return Slidable(
+      endActionPane: ActionPane(
+        motion: ScrollMotion(),
         children: [
-          Icon(Icons.fitness_center, color: AppColors.surfaceColor),
-          Text(
-            title,
-            style: TextStyle(
-              color: AppColors.surfaceColor,
-              fontWeight: FontWeight.bold,
-            ),
+          SlidableAction(
+            onPressed: deleteHabit,
+            backgroundColor: AppColors.errorColor,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Delete',
           ),
         ],
       ),
-      subtitle: Row(
-        spacing: 12.0,
-        children: [
-          Text("Mon", style: TextStyle(color: AppColors.surfaceColor)),
-          Text("Tue", style: TextStyle(color: AppColors.surfaceColor)),
-          Text("Wed", style: TextStyle(color: AppColors.surfaceColor)),
-          Text("Thu", style: TextStyle(color: AppColors.surfaceColor)),
-          Text("Fri", style: TextStyle(color: AppColors.surfaceColor)),
-          Icon(Icons.check, color: AppColors.surfaceColor),
-          Text("Sun", style: TextStyle(color: AppColors.surfaceColor)),
-        ],
-      ),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        tileColor: AppColors.backgroundColor,
+        title: Row(
+          spacing: 10.0,
+          children: [
+            Icon(Icons.fitness_center, color: AppColors.surfaceColor),
+            Text(
+              widget.title,
+              style: TextStyle(
+                color: AppColors.surfaceColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        subtitle: Row(
+          spacing: 12.0,
+          children: [
+            Text("Mon", style: TextStyle(color: AppColors.surfaceColor)),
+            Text("Tue", style: TextStyle(color: AppColors.surfaceColor)),
+            Text("Wed", style: TextStyle(color: AppColors.surfaceColor)),
+            Text("Thu", style: TextStyle(color: AppColors.surfaceColor)),
+            Text("Fri", style: TextStyle(color: AppColors.surfaceColor)),
+            Icon(Icons.check, color: AppColors.surfaceColor),
+            Text("Sun", style: TextStyle(color: AppColors.surfaceColor)),
+          ],
+        ),
 
-      // subtitle: Text('¬Habit Description'),
-      // trailing: Icon(Icons.check_circle_outline),
+        // subtitle: Text('¬Habit Description'),
+        // trailing: Icon(Icons.check_circle_outline),
+      ),
     );
   }
 }

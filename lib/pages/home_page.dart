@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import 'package:own_yourself/data/habit_database.dart';
+import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/types.dart';
 import 'package:own_yourself/widgets/habit_card.dart';
 import 'package:own_yourself/widgets/new_habit_form.dart';
-import '../utils/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +14,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final AppDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    db = AppDatabase();
+  }
+
   void createNewHabit() {
     showDialog(
       context: context,
@@ -23,21 +31,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> addNewHabit(Habit habit) async {
-    var newHabit = Habit(
-      // id: habit.id,
-      title: habit.title,
-      repetitionType: habit.repetitionType,
-      repetitionTimes: habit.repetitionTimes,
-      startDate: DateTime.now(),
-      endDate: DateTime.now().add(Duration(days: 30)),
+  Future<void> addNewHabit(HabitEntity habit) async {
+    await db.insertHabit(
+      HabitsCompanion.insert(
+        title: habit.title,
+        habitRepetitionType: habit.repetitionType.name,
+        habitRepetitionTimes: habit.repetitionTimes,
+        startDate: DateTime.now(),
+        endDate: Value(DateTime.now().add(Duration(days: 30))),
+      ),
     );
 
-    final id = await HabitDatabase.instance.insertHabit(habit);
-    setState(() {
-      data.add(newHabit);
-      Navigator.pop(context);
-    });
+    Navigator.pop(context);
+  }
+
+  Future<void> deleteExistingHabit(int id) async {
+    await db.deleteHabit(id);
   }
 
   @override
@@ -51,42 +60,32 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: AppColors.backgroundColor,
         extendedTextStyle: TextStyle(color: Colors.white),
       ),
-      body: FutureBuilder(
-        future: HabitDatabase.instance.getAllHabits(),
+      body: StreamBuilder<List<Habit>>(
+        stream: db.watchHabits(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            final habits = snapshot.data as List<Habit>;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  return HabitCard(title: habits[index].title);
-                },
-                separatorBuilder: (context, index) {
-                  return SizedBox(height: 10);
-                },
-                itemCount: habits.length,
-              ),
-            );
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
           }
+
+          final habits = snapshot.data!;
+
+          if (habits.isEmpty) {
+            return const Center(child: Text("No habits yet"));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.separated(
+              itemCount: habits.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final habit = habits[index];
+                return HabitCard(title: habit.title, habitId: habit.id, deleteExistingHabit: deleteExistingHabit,);
+              },
+            ),
+          );
         },
       ),
-      // body: Padding(
-      //   padding: const EdgeInsets.all(8.0),
-      //   child: ListView.separated(
-      //     itemBuilder: (context, index) {
-      //       return HabitCard(title: data[index].title);
-      //     },
-      //     separatorBuilder: (context, index) {
-      //       return SizedBox(height: 10);
-      //     },
-      //     itemCount: data.length,
-      //   ),
-      // ),
     );
   }
 }
