@@ -80,7 +80,11 @@ class _HomePageState extends State<HomePage> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final habit = habits[index];
-                return HabitCard(title: habit.title, habitId: habit.id, deleteExistingHabit: deleteExistingHabit,);
+                return HabitCard(
+                  title: habit.title,
+                  habitId: habit.id,
+                  deleteExistingHabit: deleteExistingHabit,
+                );
               },
             ),
           );

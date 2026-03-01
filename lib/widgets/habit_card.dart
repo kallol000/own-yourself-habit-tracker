@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:own_yourself/utils/consts.dart';
+import 'package:own_yourself/widgets/card_segment_button.dart';
 import 'package:own_yourself/widgets/confirmation_popup.dart';
 
 class HabitCard extends StatefulWidget {
@@ -49,29 +50,30 @@ class _HabitCardState extends State<HabitCard> {
       child: ListTile(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         tileColor: AppColors.backgroundColor,
-        title: Row(
-          spacing: 10.0,
-          children: [
-            Icon(Icons.fitness_center, color: AppColors.surfaceColor),
-            Text(
-              widget.title,
-              style: TextStyle(
-                color: AppColors.surfaceColor,
-                fontWeight: FontWeight.bold,
+
+        title: Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Row(
+            spacing: 10.0,
+            children: [
+              Icon(Icons.fitness_center, color: AppColors.surfaceColor),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  color: AppColors.surfaceColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+
         subtitle: Row(
           spacing: 12.0,
           children: [
-            Text("Mon", style: TextStyle(color: AppColors.surfaceColor)),
-            Text("Tue", style: TextStyle(color: AppColors.surfaceColor)),
-            Text("Wed", style: TextStyle(color: AppColors.surfaceColor)),
-            Text("Thu", style: TextStyle(color: AppColors.surfaceColor)),
-            Text("Fri", style: TextStyle(color: AppColors.surfaceColor)),
-            Icon(Icons.check, color: AppColors.surfaceColor),
-            Text("Sun", style: TextStyle(color: AppColors.surfaceColor)),
+            CardSegmentButton(
+              days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            ),
           ],
         ),
 
