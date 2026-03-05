@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:own_yourself/widgets/card_segment_button.dart';
 import 'package:own_yourself/widgets/confirmation_popup.dart';
+import 'package:own_yourself/pages/habit_details_page.dart';
 
 class HabitCard extends StatefulWidget {
   final int habitId;
   final String title;
   final Future<void> Function(int id) deleteExistingHabit;
+  final Future<void> Function(int habitId, DateTime date) toggleHabitLog;
+  final List<HabitLog> habitLogs;
   const HabitCard({
     super.key,
     required this.title,
     required this.deleteExistingHabit,
     required this.habitId,
+    required this.toggleHabitLog,
+    required this.habitLogs,
   });
 
   @override
   State<HabitCard> createState() => _HabitCardState();
 }
+
+final List<String> lastSevenDays = getLastNDays(7);
+
+final List<DateTime> lastSevenWeekdays = getLastNWeekdays(7);
 
 class _HabitCardState extends State<HabitCard> {
   void deleteHabit(BuildContext context) {
@@ -73,9 +83,23 @@ class _HabitCardState extends State<HabitCard> {
           spacing: 12.0,
           children: [
             CardSegmentButton(
-              days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              habitId: widget.habitId,
+              days: lastSevenWeekdays,
+              toggleHabitLog: widget.toggleHabitLog,
+              habitLogs: widget.habitLogs,
             ),
-            ElevatedButton(onPressed: getLastSevenDays, child: Text('test')),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        HabitDetailsPage(habitId: widget.habitId),
+                  ),
+                );
+              },
+              child: Icon(Icons.navigate_next_sharp),
+            ),
           ],
         ),
 

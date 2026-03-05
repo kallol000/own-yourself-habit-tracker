@@ -457,15 +457,17 @@ class $HabitLogsTable extends HabitLogs
       'REFERENCES habits (id) ON DELETE CASCADE',
     ),
   );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<DateTime, String> completedAt =
-      GeneratedColumn<String>(
-        'completed_at',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<DateTime>($HabitLogsTable.$convertercompletedAt);
+  late final GeneratedColumn<String> completedAt = GeneratedColumn<String>(
+    'completed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<int> value = GeneratedColumn<int>(
@@ -510,6 +512,17 @@ class $HabitLogsTable extends HabitLogs
     } else if (isInserting) {
       context.missing(_habitIdMeta);
     }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_completedAtMeta);
+    }
     if (data.containsKey('value')) {
       context.handle(
         _valueMeta,
@@ -539,12 +552,10 @@ class $HabitLogsTable extends HabitLogs
         DriftSqlType.int,
         data['${effectivePrefix}habit_id'],
       )!,
-      completedAt: $HabitLogsTable.$convertercompletedAt.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}completed_at'],
-        )!,
-      ),
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completed_at'],
+      )!,
       value: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}value'],
@@ -560,15 +571,12 @@ class $HabitLogsTable extends HabitLogs
   $HabitLogsTable createAlias(String alias) {
     return $HabitLogsTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<DateTime, String> $convertercompletedAt =
-      const DateTimeConverter();
 }
 
 class HabitLog extends DataClass implements Insertable<HabitLog> {
   final int id;
   final int habitId;
-  final DateTime completedAt;
+  final String completedAt;
   final int value;
   final String? note;
   const HabitLog({
@@ -583,11 +591,7 @@ class HabitLog extends DataClass implements Insertable<HabitLog> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['habit_id'] = Variable<int>(habitId);
-    {
-      map['completed_at'] = Variable<String>(
-        $HabitLogsTable.$convertercompletedAt.toSql(completedAt),
-      );
-    }
+    map['completed_at'] = Variable<String>(completedAt);
     map['value'] = Variable<int>(value);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
@@ -613,7 +617,7 @@ class HabitLog extends DataClass implements Insertable<HabitLog> {
     return HabitLog(
       id: serializer.fromJson<int>(json['id']),
       habitId: serializer.fromJson<int>(json['habitId']),
-      completedAt: serializer.fromJson<DateTime>(json['completedAt']),
+      completedAt: serializer.fromJson<String>(json['completedAt']),
       value: serializer.fromJson<int>(json['value']),
       note: serializer.fromJson<String?>(json['note']),
     );
@@ -624,7 +628,7 @@ class HabitLog extends DataClass implements Insertable<HabitLog> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'habitId': serializer.toJson<int>(habitId),
-      'completedAt': serializer.toJson<DateTime>(completedAt),
+      'completedAt': serializer.toJson<String>(completedAt),
       'value': serializer.toJson<int>(value),
       'note': serializer.toJson<String?>(note),
     };
@@ -633,7 +637,7 @@ class HabitLog extends DataClass implements Insertable<HabitLog> {
   HabitLog copyWith({
     int? id,
     int? habitId,
-    DateTime? completedAt,
+    String? completedAt,
     int? value,
     Value<String?> note = const Value.absent(),
   }) => HabitLog(
@@ -683,7 +687,7 @@ class HabitLog extends DataClass implements Insertable<HabitLog> {
 class HabitLogsCompanion extends UpdateCompanion<HabitLog> {
   final Value<int> id;
   final Value<int> habitId;
-  final Value<DateTime> completedAt;
+  final Value<String> completedAt;
   final Value<int> value;
   final Value<String?> note;
   const HabitLogsCompanion({
@@ -696,7 +700,7 @@ class HabitLogsCompanion extends UpdateCompanion<HabitLog> {
   HabitLogsCompanion.insert({
     this.id = const Value.absent(),
     required int habitId,
-    required DateTime completedAt,
+    required String completedAt,
     this.value = const Value.absent(),
     this.note = const Value.absent(),
   }) : habitId = Value(habitId),
@@ -720,7 +724,7 @@ class HabitLogsCompanion extends UpdateCompanion<HabitLog> {
   HabitLogsCompanion copyWith({
     Value<int>? id,
     Value<int>? habitId,
-    Value<DateTime>? completedAt,
+    Value<String>? completedAt,
     Value<int>? value,
     Value<String?>? note,
   }) {
@@ -743,9 +747,7 @@ class HabitLogsCompanion extends UpdateCompanion<HabitLog> {
       map['habit_id'] = Variable<int>(habitId.value);
     }
     if (completedAt.present) {
-      map['completed_at'] = Variable<String>(
-        $HabitLogsTable.$convertercompletedAt.toSql(completedAt.value),
-      );
+      map['completed_at'] = Variable<String>(completedAt.value);
     }
     if (value.present) {
       map['value'] = Variable<int>(value.value);
@@ -1103,7 +1105,7 @@ typedef $$HabitLogsTableCreateCompanionBuilder =
     HabitLogsCompanion Function({
       Value<int> id,
       required int habitId,
-      required DateTime completedAt,
+      required String completedAt,
       Value<int> value,
       Value<String?> note,
     });
@@ -1111,7 +1113,7 @@ typedef $$HabitLogsTableUpdateCompanionBuilder =
     HabitLogsCompanion Function({
       Value<int> id,
       Value<int> habitId,
-      Value<DateTime> completedAt,
+      Value<String> completedAt,
       Value<int> value,
       Value<String?> note,
     });
@@ -1153,11 +1155,10 @@ class $$HabitLogsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get completedAt =>
-      $composableBuilder(
-        column: $table.completedAt,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnFilters<String> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get value => $composableBuilder(
     column: $table.value,
@@ -1258,11 +1259,10 @@ class $$HabitLogsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<DateTime, String> get completedAt =>
-      $composableBuilder(
-        column: $table.completedAt,
-        builder: (column) => column,
-      );
+  GeneratedColumn<String> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get value =>
       $composableBuilder(column: $table.value, builder: (column) => column);
@@ -1324,7 +1324,7 @@ class $$HabitLogsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> habitId = const Value.absent(),
-                Value<DateTime> completedAt = const Value.absent(),
+                Value<String> completedAt = const Value.absent(),
                 Value<int> value = const Value.absent(),
                 Value<String?> note = const Value.absent(),
               }) => HabitLogsCompanion(
@@ -1338,7 +1338,7 @@ class $$HabitLogsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int habitId,
-                required DateTime completedAt,
+                required String completedAt,
                 Value<int> value = const Value.absent(),
                 Value<String?> note = const Value.absent(),
               }) => HabitLogsCompanion.insert(

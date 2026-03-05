@@ -17,6 +17,23 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 2;
 
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // This creates the new table during the upgrade
+        await m.createTable(habitLogs);
+      }
+    },
+    beforeOpen: (details) async {
+      // Essential for the 'onDelete: KeyAction.cascade' logic to work
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
+
   // Habits methods
   Stream<List<Habit>> watchHabits() =>
       select(habits).watch(); // stream existing habits
@@ -24,9 +41,14 @@ class AppDatabase extends _$AppDatabase {
       into(habits).insert(habit); //insert a new habit
   Future<int> deleteHabit(int id) {
     return (delete(habits)..where((habits) => habits.id.isValue(id))).go();
-  } // delete an existing habit
+  }
 
-  //Habitlog methods
+  Stream<Habit> watchHabitById(int id) {
+    return (select(habits)..where((h) => h.id.equals(id))).watchSingle();
+  }
+
+  // --- HabitLogs Methods ---
+
   // Create a new log entry (e.g., user clicked "Complete" for today)
   Future<int> insertLog(HabitLogsCompanion log) => into(habitLogs).insert(log);
 
@@ -39,14 +61,56 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deleteLog(int logId) =>
       (delete(habitLogs)..where((t) => t.id.equals(logId))).go();
 
-  Stream<List<HabitWithLogs>> watchHabitsWithLogs() {
-    // 1. Start with the habits table
+  // toggle habit entry for a specific date (e.g., mark as complete or undo)
+  Future<void> toggleHabitLog(int habitId, DateTime date) async {
+    // 1. Normalize to midnight and convert to ISO String
+    // This results in "2026-03-04T00:00:00.000"
+    final String dateString = DateTime(
+      date.year,
+      date.month,
+      date.day,
+    ).toIso8601String();
+
+    // 2. Check for existing log using the String directly
+    final query = select(habitLogs)
+      ..where((t) => t.habitId.equals(habitId))
+      ..where((t) => t.completedAt.equals(dateString));
+
+    final existingLog = await query.getSingleOrNull();
+
+    if (existingLog != null) {
+      // 3. Delete if found
+      await (delete(habitLogs)..where((t) => t.id.equals(existingLog.id))).go();
+    } else {
+      // 4. Insert if not found
+      // If your compiler still complains here, use Value(dateString)
+      await into(habitLogs).insert(
+        HabitLogsCompanion.insert(habitId: habitId, completedAt: dateString),
+      );
+    }
+  }
+
+  Stream<List<HabitWithLogs>> watchHabitsWithLast7DaysLogs() {
+    // 1. Calculate the threshold (7 days ago at midnight)
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+    final normalizedDate = DateTime(
+      sevenDaysAgo.year,
+      sevenDaysAgo.month,
+      sevenDaysAgo.day,
+    );
+
+    // 2. Convert to ISO 8601 String to match the DB storage format
+    final String thresholdString = normalizedDate.toIso8601String();
+
     final query = select(habits).join([
-      // 2. Join habit_logs where the habitId matches
-      leftOuterJoin(habitLogs, habitLogs.habitId.equalsExp(habits.id)),
+      leftOuterJoin(
+        habitLogs,
+        habitLogs.habitId.equalsExp(habits.id) &
+            // Use the String here to satisfy the SQL requirement
+            habitLogs.completedAt.isBiggerOrEqualValue(thresholdString),
+      ),
     ]);
 
-    // 3. Transform the flat rows into our HabitWithLogs objects
     return query.watch().map((rows) {
       final Map<Habit, List<HabitLog>> grouped = {};
 
@@ -54,10 +118,7 @@ class AppDatabase extends _$AppDatabase {
         final habit = row.readTable(habits);
         final log = row.readTableOrNull(habitLogs);
 
-        // Initialize the list for this habit if it doesn't exist
         grouped.putIfAbsent(habit, () => []);
-
-        // If a log exists for this row, add it to the list
         if (log != null) {
           grouped[habit]!.add(log);
         }
@@ -66,6 +127,26 @@ class AppDatabase extends _$AppDatabase {
       return grouped.entries
           .map((entry) => HabitWithLogs(habit: entry.key, logs: entry.value))
           .toList();
+    });
+  }
+
+  Stream<HabitWithLogs> watchHabitWithLogsById(int habitId) {
+    final query = select(habits).join([
+      leftOuterJoin(
+        habitLogs,
+        habitLogs.habitId.equalsExp(habits.id),
+      ),
+    ])
+      ..where(habits.id.equals(habitId));
+
+    return query.watch().map((rows) {
+      final habit = rows.first.readTable(habits);
+      final logs = rows
+          .map((row) => row.readTableOrNull(habitLogs))
+          .whereType<HabitLog>()
+          .toList();
+
+      return HabitWithLogs(habit: habit, logs: logs);
     });
   }
 }

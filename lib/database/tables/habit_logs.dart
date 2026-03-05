@@ -6,15 +6,26 @@ import 'package:own_yourself/utils/helper_functions.dart';
 class HabitLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  // Links this log entry to a specific habit
-  IntColumn get habitId => integer().references(Habits, #id, onDelete: KeyAction.cascade)();
+  // The correct way to reference the habits table with a cascade delete
+  IntColumn get habitId => integer().references(
+    Habits,
+    #id,
+    onDelete: KeyAction.cascade, // Updated from Operation to KeyAction
+  )();
 
-  // The specific date/time the habit was performed
-  TextColumn get completedAt => text().map(const DateTimeConverter())();
+  TextColumn get completedAt => text()();
 
-  // Useful if the habit is "Drink 8 glasses of water" and they only drank 2
   IntColumn get value => integer().withDefault(const Constant(1))();
 
-  // Optional: Add a note for specific entries
   TextColumn get note => text().nullable()();
+}
+
+class DateTimeConverter extends TypeConverter<DateTime, String> {
+  const DateTimeConverter();
+
+  @override
+  DateTime fromSql(String fromDb) => DateTime.parse(fromDb);
+
+  @override
+  String toSql(DateTime value) => value.toIso8601String();
 }
