@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:own_yourself/utils/consts.dart';
+import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:own_yourself/widgets/card_segment_button.dart';
 import 'package:own_yourself/widgets/confirmation_popup.dart';
 
@@ -74,6 +75,7 @@ class _HabitCardState extends State<HabitCard> {
             CardSegmentButton(
               days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             ),
+            ElevatedButton(onPressed: getLastSevenDays, child: Text('test')),
           ],
         ),
 

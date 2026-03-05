@@ -1,3 +1,5 @@
+import 'package:own_yourself/database/tables/habits.dart';
+
 class HabitEntity {
   final int? id;
   final String title;
@@ -40,6 +42,8 @@ class HabitEntity {
   }
 }
 
+
+
 enum HabitRepetitionType { daily, weekly, monthly }
 
 Map<HabitRepetitionType, String> habitRepetitionTypeNames = {
@@ -47,3 +51,16 @@ Map<HabitRepetitionType, String> habitRepetitionTypeNames = {
   HabitRepetitionType.weekly: "a week",
   HabitRepetitionType.monthly: "a month",
 };
+
+
+class WeekdayNode {
+  final int weekdayNumber;
+  final String weekdayNameShort;
+  final String weekdayNameLong;
+  WeekdayNode? next;
+  WeekdayNode? previous;
+
+  WeekdayNode({required this.weekdayNumber, required this.weekdayNameShort, required this.weekdayNameLong});
+}
+
+
