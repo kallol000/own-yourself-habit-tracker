@@ -31,6 +31,12 @@ class MainApp extends StatelessWidget {
             backgroundColor: AppColors.backgroundColor,
           ),
         ),
+        toggleButtonsTheme: ToggleButtonsThemeData(
+          borderRadius: BorderRadius.circular(buttonRadius),
+          selectedColor: AppColors.surfaceColor,
+          fillColor: AppColors.accentColor,
+          color: AppColors.backgroundColor,
+        ),
         cupertinoOverrideTheme: CupertinoThemeData(
           barBackgroundColor: AppColors.backgroundColor,
           primaryColor: AppColors.backgroundColor,

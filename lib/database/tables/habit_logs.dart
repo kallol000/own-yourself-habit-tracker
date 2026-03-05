@@ -2,15 +2,28 @@ import 'package:drift/drift.dart';
 import 'package:own_yourself/database/tables/habits.dart';
 
 class HabitLogs extends Table {
-  IntColumn get id => integer().references(Habits, #id)();
+  IntColumn get id => integer().autoIncrement()();
 
-  TextColumn get title => text()();
+  // The correct way to reference the habits table with a cascade delete
+  IntColumn get habitId => integer().references(
+    Habits,
+    #id,
+    onDelete: KeyAction.cascade, // Updated from Operation to KeyAction
+  )();
 
-  TextColumn get habitRepetitionType => text()();
+  TextColumn get completedAt => text()();
 
-  IntColumn get habitRepetitionTimes => integer()();
+  IntColumn get value => integer().withDefault(const Constant(1))();
 
-  DateTimeColumn get startDate => dateTime()();
+  TextColumn get note => text().nullable()();
+}
 
-  DateTimeColumn get endDate => dateTime().nullable()();
+class DateTimeConverter extends TypeConverter<DateTime, String> {
+  const DateTimeConverter();
+
+  @override
+  DateTime fromSql(String fromDb) => DateTime.parse(fromDb);
+
+  @override
+  String toSql(DateTime value) => value.toIso8601String();
 }

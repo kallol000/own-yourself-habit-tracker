@@ -45,8 +45,14 @@ class _HomePageState extends State<HomePage> {
     Navigator.pop(context);
   }
 
+  // This is called when user swipes  left to delete a habit card
   Future<void> deleteExistingHabit(int id) async {
     await db.deleteHabit(id);
+  }
+
+  // This is called when user clicks the day for a habit on a specific day
+  Future<void> toggleHabitLog(int habitId, DateTime date) async {
+    await db.toggleHabitLog(habitId, date);
   }
 
   @override
@@ -60,14 +66,25 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: AppColors.backgroundColor,
         extendedTextStyle: TextStyle(color: Colors.white),
       ),
-      body: StreamBuilder<List<Habit>>(
-        stream: db.watchHabits(),
+      body: StreamBuilder<List<HabitWithLogs>>(
+        stream: db.watchHabitsWithLast7DaysLogs(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final habits = snapshot.data!;
+
+          final fullData = habits
+              .map(
+                (item) => {
+                  'habit': item.habit.toJson(),
+                  'logs': item.logs.map((log) => log.toJson()).toList(),
+                },
+              )
+              .toList();
+
+          // print(fullData);
 
           if (habits.isEmpty) {
             return const Center(child: Text("No habits yet"));
@@ -79,11 +96,13 @@ class _HomePageState extends State<HomePage> {
               itemCount: habits.length,
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
-                final habit = habits[index];
+                final habitWithLogs = habits[index];
                 return HabitCard(
-                  title: habit.title,
-                  habitId: habit.id,
+                  title: habitWithLogs.habit.title,
+                  habitId: habitWithLogs.habit.id,
                   deleteExistingHabit: deleteExistingHabit,
+                  toggleHabitLog: toggleHabitLog,
+                  habitLogs: habitWithLogs.logs,
                 );
               },
             ),
