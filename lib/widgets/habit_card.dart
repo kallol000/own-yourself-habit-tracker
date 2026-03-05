@@ -58,53 +58,66 @@ class _HabitCardState extends State<HabitCard> {
           ),
         ],
       ),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        tileColor: AppColors.backgroundColor,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return HabitDetailsPage(habitId: widget.habitId);
+              },
+            ),
+          );
+        },
+        child: ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          tileColor: AppColors.backgroundColor,
 
-        title: Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
-          child: Row(
-            spacing: 10.0,
-            children: [
-              Icon(Icons.fitness_center, color: AppColors.surfaceColor),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  color: AppColors.surfaceColor,
-                  fontWeight: FontWeight.bold,
+          title: Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              spacing: 10.0,
+              children: [
+                Icon(Icons.fitness_center, color: AppColors.surfaceColor),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: AppColors.surfaceColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ],
+            ),
+          ),
+
+          subtitle: Row(
+            // spacing: 12.0,
+            children: [
+              CardSegmentButton(
+                habitId: widget.habitId,
+                days: lastSevenWeekdays,
+                toggleHabitLog: widget.toggleHabitLog,
+                habitLogs: widget.habitLogs,
               ),
+              // ElevatedButton(
+
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             HabitDetailsPage(habitId: widget.habitId),
+              //       ),
+              //     );
+              //   },
+              //   child: Icon(Icons.navigate_next_sharp),
+              // ),
             ],
           ),
-        ),
 
-        subtitle: Row(
-          spacing: 12.0,
-          children: [
-            CardSegmentButton(
-              habitId: widget.habitId,
-              days: lastSevenWeekdays,
-              toggleHabitLog: widget.toggleHabitLog,
-              habitLogs: widget.habitLogs,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        HabitDetailsPage(habitId: widget.habitId),
-                  ),
-                );
-              },
-              child: Icon(Icons.navigate_next_sharp),
-            ),
-          ],
+          // subtitle: Text('¬Habit Description'),
+          // trailing: Icon(Icons.check_circle_outline),
         ),
-
-        // subtitle: Text('¬Habit Description'),
-        // trailing: Icon(Icons.check_circle_outline),
       ),
     );
   }
