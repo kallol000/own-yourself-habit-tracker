@@ -148,6 +148,9 @@ class _NewHabitFormState extends State<NewHabitForm> {
                     title: habitNameController.text,
                     repetitionType:
                         HabitRepetitionType.values[selectedRepetitionType],
+                    repetitionTimes: selectedRepetitionType == 0
+                        ? 1
+                        : selectedRepetitionTimes + 1,
                     startDate: DateTime.now(),
                     endDate: DateTime(2099),
                   );

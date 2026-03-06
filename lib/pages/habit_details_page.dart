@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:own_yourself/database/app_database.dart';
+import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HabitDetailsPage extends StatefulWidget {
@@ -36,12 +37,20 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
           }
 
           final habitWithLogs = snapshot.data!;
+          print(habitWithLogs.habit.habitRepetitionTimes);
 
           highlightedDays = habitWithLogs.logs
               .map((log) => DateTime.parse(log.completedAt).toIso8601String())
               .toSet();
 
           // print(habitWithLogs.habit.title);
+
+          final streak = StreakCalculator.calculate(
+            habitWithLogs.habit,
+            habitWithLogs.logs,
+          );
+
+          // print('Current Streak: $streak');
 
           return Column(
             children: [
@@ -74,6 +83,22 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
                     highlightedDays.add(normalizedSelectedDay);
                   }
                   await db.toggleHabitLog(widget.habitId, selectedDay);
+
+                  // 3. BEST STREAK LOGIC
+                  // Get the most recent data for this specific habit
+                  final updatedData = await db.getHabitWithLogsById(
+                    widget.habitId,
+                  );
+
+                  final newStreak = StreakCalculator.calculate(
+                    updatedData.habit,
+                    updatedData.logs,
+                  );
+
+                  // Only update if the new streak is higher than the previous best
+                  if (newStreak > updatedData.habit.bestStreak) {
+                    await db.updateBestStreak(widget.habitId, newStreak);
+                  }
                 },
                 calendarBuilders: CalendarBuilders(
                   // This custom builder only runs for specific days
@@ -101,6 +126,9 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
                   },
                 ),
               ),
+
+              Text("Current Streak: $streak"),
+              Text("best Streak: ${habitWithLogs.habit.bestStreak}"),
             ],
           );
         },

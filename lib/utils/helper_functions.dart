@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/types.dart';
 import '../utils/types.dart';
 
@@ -116,4 +117,132 @@ List<DateTime> getLastNWeekdays(int numberOfDays) {
     result.insert(0, finalDate);
   }
   return result;
+}
+
+class StreakCalculator {
+  // Main entry point
+  static int calculate(Habit habit, List<HabitLog> logs) {
+    if (logs.isEmpty) return 0;
+
+    // 1. Sort logs newest to oldest
+    final sortedLogs = List<HabitLog>.from(logs)
+      ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
+
+    // 2. Route to specific logic
+    switch (habit.habitRepetitionType.toLowerCase()) {
+      case 'daily':
+        return _calculateDaily(habit, sortedLogs);
+      case 'weekly':
+        return _calculateWeekly(habit, sortedLogs);
+      case 'monthly':
+        return _calculateMonthly(habit, sortedLogs);
+      default:
+        return 0;
+    }
+  }
+
+  // --- DAILY LOGIC ---
+  static int _calculateDaily(Habit habit, List<HabitLog> logs) {
+    int streak = 0;
+    DateTime checkDate = DateTime.now().dateOnly;
+    final logSet = logs.map((l) => l.completedAt).toSet();
+    final startStr = habit.startDate.toIso8601String();
+
+    // Loop backwards until we hit the start date
+    while (checkDate.isAtSameMomentAs(habit.startDate) ||
+        checkDate.isAfter(habit.startDate)) {
+      String currentStr = checkDate.toIso8601String();
+
+      if (logSet.contains(currentStr)) {
+        streak++;
+      } else {
+        // If it's today and not done yet, don't break the streak
+        if (currentStr == DateTime.now().dateOnly.toIso8601String()) {
+          checkDate = checkDate.subtract(const Duration(days: 1));
+          continue;
+        }
+        break; // Missed a day after the habit started
+      }
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
+  // --- WEEKLY LOGIC (e.g., 3x a week) ---
+  static int _calculateWeekly(Habit habit, List<HabitLog> logs) {
+    int streak = 0;
+    DateTime now = DateTime.now().dateOnly;
+    // Get Monday of the current week
+    DateTime currentMonday = now.subtract(Duration(days: now.weekday - 1));
+
+    bool isCurrentWeek = true;
+
+    while (currentMonday.isAfter(
+      habit.startDate.subtract(const Duration(days: 7)),
+    )) {
+      final weekStart = currentMonday;
+      final weekEnd = currentMonday.add(const Duration(days: 7));
+
+      final count = logs.where((l) {
+        final d = DateTime.parse(l.completedAt);
+        return (d.isAtSameMomentAs(weekStart) || d.isAfter(weekStart)) &&
+            d.isBefore(weekEnd);
+      }).length;
+
+      if (count >= habit.habitRepetitionTimes) {
+        streak++;
+      } else if (!isCurrentWeek) {
+        break; // Failed a past week
+      }
+
+      currentMonday = currentMonday.subtract(const Duration(days: 7));
+      isCurrentWeek = false;
+    }
+    return streak;
+  }
+
+  // --- MONTHLY LOGIC ---
+  static int _calculateMonthly(Habit habit, List<HabitLog> logs) {
+    int streak = 0;
+    DateTime now = DateTime.now().dateOnly;
+    DateTime currentMonthStart = DateTime(now.year, now.month, 1);
+
+    bool isCurrentMonth = true;
+
+    while (currentMonthStart.isAfter(
+      DateTime(habit.startDate.year, habit.startDate.month - 1, 1),
+    )) {
+      final nextMonth = DateTime(
+        currentMonthStart.year,
+        currentMonthStart.month + 1,
+        1,
+      );
+
+      final count = logs.where((l) {
+        final d = DateTime.parse(l.completedAt);
+        return (d.isAtSameMomentAs(currentMonthStart) ||
+                d.isAfter(currentMonthStart)) &&
+            d.isBefore(nextMonth);
+      }).length;
+
+      if (count >= habit.habitRepetitionTimes) {
+        streak++;
+      } else if (!isCurrentMonth) {
+        break;
+      }
+
+      currentMonthStart = DateTime(
+        currentMonthStart.year,
+        currentMonthStart.month - 1,
+        1,
+      );
+      isCurrentMonth = false;
+    }
+    return streak;
+  }
+}
+
+// Simple extension to make code cleaner
+extension DateOnly on DateTime {
+  DateTime get dateOnly => DateTime(year, month, day);
 }

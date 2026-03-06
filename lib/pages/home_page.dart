@@ -33,13 +33,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> addNewHabit(HabitEntity habit) async {
+    final normalizedDate = DateTime(2026, 2, 1);
+
     await db.insertHabit(
       HabitsCompanion.insert(
         title: habit.title,
         habitRepetitionType: habit.repetitionType.name,
         habitRepetitionTimes: habit.repetitionTimes,
-        startDate: DateTime.now(),
-        endDate: Value(DateTime.now().add(Duration(days: 30))),
+        startDate: normalizedDate,
       ),
     );
 
