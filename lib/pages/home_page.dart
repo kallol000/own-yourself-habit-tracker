@@ -60,15 +60,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Own Yourself')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: createNewHabit,
-        label: Text('Start a new Habit'),
-        icon: Icon(Icons.add),
-        backgroundColor: AppColors.backgroundColor,
-        extendedTextStyle: TextStyle(color: Colors.white),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text('Own Yourself'),
+        backgroundColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.surfaceColor,
+        ),
       ),
-      body: StreamBuilder<List<HabitWithLogs>>(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xff0a9396),
+        onPressed: createNewHabit,
+        child: Icon(Icons.add),
+        // label: Text('Start a new Habit'),
+        // icon: Icon(Icons.add),
+      ),
+      body: StreamBuilder(
         stream: db.watchHabitsWithLast7DaysLogs(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -77,14 +86,14 @@ class _HomePageState extends State<HomePage> {
 
           final habitsWithLogs = snapshot.data!;
 
-          final fullData = habitsWithLogs
-              .map(
-                (item) => {
-                  'habit': item.habit.toJson(),
-                  'logs': item.logs.map((log) => log.toJson()).toList(),
-                },
-              )
-              .toList();
+          // final fullData = habitsWithLogs
+          //     .map(
+          //       (item) => {
+          //         'habit': item.habit.toJson(),
+          //         'logs': item.logs.map((log) => log.toJson()).toList(),
+          //       },
+          //     )
+          //     .toList();
 
           // print(fullData);
 

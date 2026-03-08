@@ -18,8 +18,8 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.0
   flutter_slidable: ^4.0.3
   table_calendar: ^3.2.0
-
-  
+  mesh: ^0.5.0
+  flutter_gradient_colors: ^2.1.1
 
 dev_dependencies:
   flutter_test:
@@ -29,12 +29,16 @@ dev_dependencies:
   drift_dev: ^2.31.0
   build_runner: ^2.10.5
 
-
-
-assets:
-  sqlite3.wasm
-  drift_worker.js
-
-
 flutter:
   uses-material-design: true
+
+  # 1. Fixed Asset Formatting (Added dashes)
+
+  # 2. Added Shaders Section (Indented 2 spaces under flutter)
+  assets:
+    - assets/icons/
+  shaders:
+    - assets/shaders/gradient.frag
+  
+    # - sqlite3.wasm
+    # - drift_worker.js

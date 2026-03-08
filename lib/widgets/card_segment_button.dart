@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gradient_colors/flutter_gradient_colors.dart';
 import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
@@ -42,15 +43,34 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
 
     return Expanded(
       child: ToggleButtons(
-        fillColor: AppColors.accentColor,
+        fillColor: Color(0xff0a9396),
         selectedColor: AppColors.surfaceColor,
-        borderWidth: 1,
+        borderRadius: BorderRadius.circular(5),
+        splashColor: Colors.white.withAlpha(50),
+
+        // disabledColor: AppColors.surfaceColor,
         color: AppColors.surfaceColor,
         constraints: BoxConstraints(minHeight: 30, minWidth: 40),
-
         isSelected: currentSelection,
         children: widget.days
-            .map((day) => Text(weekdayMap[day.weekday]!))
+            .map(
+              (day) => Container(
+                // alignment: Alignment.center,
+                // constraints: const BoxConstraints(minWidth: 40, maxHeight: ),
+                // decoration: BoxDecoration(
+                //   borderRadius: BorderRadius.circular(2),
+                //   // Apply gradient only if the button is selected
+                //   gradient: currentSelection[day.weekday - 1]
+                //       ? const LinearGradient(
+                //           colors: GradientColors.eternalConstance,
+                //           begin: Alignment.topLeft,
+                //           end: Alignment.bottomRight,
+                //         )
+                //       : null,
+                // ),
+                child: Text(weekdayMap[day.weekday]!),
+              ),
+            )
             .toList(),
         onPressed: (index) {
           widget.toggleHabitLog!(widget.habitId, widget.days[index]);
