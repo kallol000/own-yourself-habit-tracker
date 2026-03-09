@@ -63,103 +63,181 @@ class _NewHabitFormState extends State<NewHabitForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.transparent,
+      contentTextStyle: TextStyle(color: AppColors.surfaceColor),
+
       content: Container(
-        width: 400,
-        height: 400,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(0.0)),
+        width: double.maxFinite,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor.withAlpha(200),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
 
-        child: Column(
-          spacing: 20,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("I want to...", style: TextStyle(fontSize: 16)),
-            TextField(
-              style: TextStyle(color: AppColors.backgroundColor),
-
-              controller: habitNameController,
-              decoration: InputDecoration(hintText: 'Excercise'),
-            ),
-
-            Row(
-              spacing: 10,
-              children: [
-                if (selectedRepetitionType != 0)
-                  CupertinoButton(
-                    child: Text((selectedRepetitionTimes + 1).toString()),
-
-                    onPressed: () {
-                      return showRepetitionTimesPicker(
-                        CupertinoPicker(
-                          scrollController: FixedExtentScrollController(
-                            initialItem: selectedRepetitionTimes,
-                          ),
-                          itemExtent: 32,
-                          onSelectedItemChanged: (value) {
-                            setState(() {
-                              selectedRepetitionTimes = value;
-                            });
-                          },
-                          children: habitTimeOptions(
-                            HabitRepetitionType.values[selectedRepetitionType],
-                          ).map((e) => Text(e.toString())).toList(),
-                        ),
-                      );
-                    },
-                  ),
-                if (selectedRepetitionType != 0)
-                  Text('time(s)', style: TextStyle(fontSize: 16)),
-                CupertinoButton(
-                  child: Text(
-                    habitRepetitionTypeNames.values
-                        .elementAt(selectedRepetitionType)
-                        .toString()
-                        .split('.')
-                        .last,
-                  ),
-
-                  onPressed: () {
-                    return showRepetitionTypePicker(
-                      CupertinoPicker(
-                        scrollController: FixedExtentScrollController(
-                          initialItem: selectedRepetitionType,
-                        ),
-                        itemExtent: 32,
-                        onSelectedItemChanged: (value) {
-                          setState(() {
-                            selectedRepetitionType = value;
-                          });
-                        },
-                        children: [...HabitRepetitionType.values]
-                            .map((e) => Text(e.toString().split('.').last))
-                            .toList(),
-                      ),
-                    );
-                  },
+            spacing: 20,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: []),
+              Text(
+                "I want to..",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppColors.surfaceColor.withAlpha(150),
                 ),
-              ],
-            ),
-
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
-                  var newHabit = HabitEntity(
-                    // id: Uuid().v4(),
-                    title: habitNameController.text,
-                    repetitionType:
-                        HabitRepetitionType.values[selectedRepetitionType],
-                    repetitionTimes: selectedRepetitionType == 0
-                        ? 1
-                        : selectedRepetitionTimes + 1,
-                    startDate: DateTime.now(),
-                    endDate: DateTime(2099),
-                  );
-                  widget.submitAction(newHabit);
-                },
-                child: Text('Start'),
               ),
-            ),
-          ],
+              TextField(
+                style: TextStyle(
+                  color: AppColors.surfaceColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+
+                controller: habitNameController,
+
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    gapPadding: 0.0,
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surfaceColor.withAlpha(50),
+                  hintText: 'Excercise',
+                  hintStyle: TextStyle(
+                    color: AppColors.surfaceColor.withAlpha(200),
+                  ),
+                ),
+              ),
+
+              Row(
+                spacing: 10,
+                children: [
+                  if (selectedRepetitionType != 0)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: AppColors.surfaceColor.withAlpha(50),
+                      ),
+                      child: CupertinoButton(
+                        child: Text(
+                          (selectedRepetitionTimes + 1).toString(),
+                          style: TextStyle(
+                            color: AppColors.surfaceColor.withAlpha(200),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        onPressed: () {
+                          return showRepetitionTimesPicker(
+                            CupertinoPicker(
+                              scrollController: FixedExtentScrollController(
+                                initialItem: selectedRepetitionTimes,
+                              ),
+                              itemExtent: 32,
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  selectedRepetitionTimes = value;
+                                });
+                              },
+                              children: habitTimeOptions(
+                                HabitRepetitionType
+                                    .values[selectedRepetitionType],
+                              ).map((e) => Text(e.toString())).toList(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  if (selectedRepetitionType != 0)
+                    Text('time(s)', style: TextStyle(fontSize: 16)),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: AppColors.surfaceColor.withAlpha(50),
+                    ),
+                    child: CupertinoButton(
+                      child: Text(
+                        habitRepetitionTypeNames.values
+                            .elementAt(selectedRepetitionType)
+                            .toString()
+                            .split('.')
+                            .last,
+                        style: TextStyle(
+                          color: AppColors.surfaceColor.withAlpha(200),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      onPressed: () {
+                        return showRepetitionTypePicker(
+                          CupertinoPicker(
+                            scrollController: FixedExtentScrollController(
+                              initialItem: selectedRepetitionType,
+                            ),
+                            itemExtent: 32,
+                            onSelectedItemChanged: (value) {
+                              setState(() {
+                                selectedRepetitionType = value;
+                              });
+                            },
+                            children: [...HabitRepetitionType.values]
+                                .map((e) => Text(e.toString().split('.').last))
+                                .toList(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              Container(
+                alignment: Alignment.topRight,
+
+                child: SizedBox(
+                  // width: double.infinity,
+                  height: 50,
+                  child: FilledButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        AppColors.accentColor.withAlpha(200),
+                      ),
+                      textStyle: WidgetStateProperty.all(
+                        TextStyle(
+                          color: AppColors.surfaceColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    onPressed: () {
+                      var newHabit = HabitEntity(
+                        // id: Uuid().v4(),
+                        title: habitNameController.text,
+                        repetitionType:
+                            HabitRepetitionType.values[selectedRepetitionType],
+                        repetitionTimes: selectedRepetitionType == 0
+                            ? 1
+                            : selectedRepetitionTimes + 1,
+                        startDate: DateTime.now(),
+                        endDate: DateTime(2099),
+                      );
+                      widget.submitAction(newHabit);
+                    },
+                    child: Text('Start'),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

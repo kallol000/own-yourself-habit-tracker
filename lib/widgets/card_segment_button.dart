@@ -42,15 +42,41 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
 
     return Expanded(
       child: ToggleButtons(
-        fillColor: AppColors.accentColor,
-        selectedColor: AppColors.surfaceColor,
-        borderWidth: 1,
+        fillColor: AppColors.surfaceColor.withAlpha(50),
+        selectedColor: AppColors.accentColor,
+        borderRadius: BorderRadius.circular(5),
+        splashColor: Colors.white.withAlpha(50),
+        textStyle: TextStyle(color: AppColors.surfaceColor, fontSize: 12),
+
+        // disabledColor: AppColors.surfaceColor,
         color: AppColors.surfaceColor,
         constraints: BoxConstraints(minHeight: 30, minWidth: 40),
-
         isSelected: currentSelection,
         children: widget.days
-            .map((day) => Text(weekdayMap[day.weekday]!))
+            .map(
+              (day) => Container(
+                // alignment: Alignment.center,
+                // constraints: const BoxConstraints(minWidth: 40, maxHeight: ),
+                // decoration: BoxDecoration(
+                //   borderRadius: BorderRadius.circular(2),
+                //   // Apply gradient only if the button is selected
+                //   gradient: currentSelection[day.weekday - 1]
+                //       ? const LinearGradient(
+                //           colors: GradientColors.eternalConstance,
+                //           begin: Alignment.topLeft,
+                //           end: Alignment.bottomRight,
+                //         )
+                //       : null,
+                // ),
+                child: Text(
+                  weekdayMap[day.weekday]!,
+                  style: TextStyle(
+                    // color: AppColors.surfaceColor,
+                    fontWeight: FontWeight.w100,
+                  ),
+                ),
+              ),
+            )
             .toList(),
         onPressed: (index) {
           widget.toggleHabitLog!(widget.habitId, widget.days[index]);
