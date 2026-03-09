@@ -4,6 +4,7 @@ import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
 import 'package:own_yourself/utils/types.dart';
+import 'package:own_yourself/widgets/background.dart';
 import 'package:own_yourself/widgets/habit_card.dart';
 import 'package:own_yourself/widgets/new_habit_form.dart';
 
@@ -59,58 +60,60 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Own Yourself')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: createNewHabit,
-        label: Text('Start a new Habit'),
-        icon: Icon(Icons.add),
-        backgroundColor: AppColors.backgroundColor,
-        extendedTextStyle: TextStyle(color: Colors.white),
-      ),
-      body: StreamBuilder<List<HabitWithLogs>>(
-        stream: db.watchHabitsWithLast7DaysLogs(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return Background(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Own Yourself')),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: createNewHabit,
+          label: Text('Start a new Habit'),
+          icon: Icon(Icons.add),
+          backgroundColor: AppColors.backgroundColor,
+          extendedTextStyle: TextStyle(color: Colors.white),
+        ),
+        body: StreamBuilder<List<HabitWithLogs>>(
+          stream: db.watchHabitsWithLast7DaysLogs(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final habitsWithLogs = snapshot.data!;
+            final habitsWithLogs = snapshot.data!;
 
-          final fullData = habitsWithLogs
-              .map(
-                (item) => {
-                  'habit': item.habit.toJson(),
-                  'logs': item.logs.map((log) => log.toJson()).toList(),
+            final fullData = habitsWithLogs
+                .map(
+                  (item) => {
+                    'habit': item.habit.toJson(),
+                    'logs': item.logs.map((log) => log.toJson()).toList(),
+                  },
+                )
+                .toList();
+
+            // print(fullData);
+
+            if (habitsWithLogs.isEmpty) {
+              // getLastSevenDays();
+              return const Center(child: Text("No habits yet"));
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.separated(
+                itemCount: habitsWithLogs.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final habitWithLogs = habitsWithLogs[index];
+                  return HabitCard(
+                    title: habitWithLogs.habit.title,
+                    habitId: habitWithLogs.habit.id,
+                    deleteExistingHabit: deleteExistingHabit,
+                    toggleHabitLog: toggleHabitLog,
+                    habitLogs: habitWithLogs.logs,
+                  );
                 },
-              )
-              .toList();
-
-          // print(fullData);
-
-          if (habitsWithLogs.isEmpty) {
-            // getLastSevenDays();
-            return const Center(child: Text("No habits yet"));
-          }
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.separated(
-              itemCount: habitsWithLogs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final habitWithLogs = habitsWithLogs[index];
-                return HabitCard(
-                  title: habitWithLogs.habit.title,
-                  habitId: habitWithLogs.habit.id,
-                  deleteExistingHabit: deleteExistingHabit,
-                  toggleHabitLog: toggleHabitLog,
-                  habitLogs: habitWithLogs.logs,
-                );
-              },
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
