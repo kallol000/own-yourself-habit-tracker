@@ -1,5 +1,6 @@
 import 'dart:ui'; // Required for ImageFilter
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:own_yourself/pages/home_page.dart';
 import 'package:own_yourself/widgets/shader_gradient.dart'; // Ensure this points to your widget
 
@@ -14,6 +15,11 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        // Applies Nunito to the entire app's text theme
+        textTheme: GoogleFonts.nunitoTextTheme(Theme.of(context).textTheme),
+      ),
       // The 'builder' wraps the Navigator, keeping the background persistent
       builder: (context, child) {
         return Scaffold(
@@ -22,7 +28,7 @@ class MainApp extends StatelessWidget {
               // 1. The Animated Shader (Persistent across all pages)
               const Positioned.fill(
                 child: ShaderGradientWidget(
-                  colorA: Color(0xFF272640), // Deep Blue
+                  colorA: Color.fromARGB(255, 61, 18, 6), // Deep Blue
                   colorB: Color(0xFF00111c), // Even Deeper Blue
                 ),
               ),

@@ -105,49 +105,12 @@ class _HabitCardState extends State<HabitCard>
             ),
             child: Stack(
               children: [
-                // 1. DYNAMIC MESH BACKGROUND
                 if (shader != null)
-                  //   Positioned.fill(
-                  //     child: Opacity(
-                  //       opacity: 0.2, // Adjust this for more/less visibility
-                  //       child: AnimatedBuilder(
-                  //         animation: _controller,
-                  //         builder: (context, _) {
-                  //           return CustomPaint(
-                  //             painter: MeshPainter(
-                  //               shader: shader!,
-                  //               time: _controller.value * 6.28318,
-                  //               // Change these colors dynamically if you want!
-                  //               colorA: Color(0xffb5179e),
-                  //               colorB: Color(0xFF02010a),
-                  //             ),
-                  //           );
-                  //         },
-                  //       ),
-                  //     ),
-                  //   )
-                  // else
-                  //   Positioned.fill(child: Container(color: Colors.black)),
-                  // 2. SEMI-TRANSPARENT GLASS OVERLAY (Improves readability)
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         color: AppColors.surfaceColor.withAlpha(20),
-                        // border: GradientBoxBorder(
-                        //   gradient: LinearGradient(
-                        //     begin: AlignmentGeometry.bottomRight,
-                        //     end: AlignmentGeometry.topLeft,
-                        //     colors: [
-                        //       Color.fromARGB(255, 58, 58, 58).withAlpha(50),
-                        //       Color.fromARGB(255, 58, 58, 58).withAlpha(150),
-                        //       // Color.fromARGB(255, 255, 255, 255).withAlpha(150),
-                        //       Color.fromARGB(255, 255, 255, 255).withAlpha(150),
-                        //     ],
-                        //   ),
-                        //   width: 2,
-                        // ),
-                        // color: Colors.black.withOpacity(0.1),
                       ),
                     ),
                   ),
@@ -161,25 +124,50 @@ class _HabitCardState extends State<HabitCard>
                   ),
                   title: Padding(
                     padding: const EdgeInsets.only(bottom: 0.0),
-                    child: Row(
+                    child: Column(
                       children: [
-                        // Image.asset(
-                        //   'assets/icons/habit_logo.png',
-                        //   width: 20,
-                        //   height: 20,
-                        //   fit: BoxFit.contain,
-                        // ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            widget.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                        Row(
+                          // crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: 10,
+                          children: [
+                            Icon(
+                              Icons.class_rounded,
+                              size: 20,
+                              color: AppColors.surfaceColor,
                             ),
-                          ),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      // fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  Text(
+                                    "12 day streak", // TODO: Calculate this dynamically
+                                    style: TextStyle(
+                                      color: AppColors.surfaceColor.withAlpha(
+                                        150,
+                                      ),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
+                        Row(children: [
+                            
+                          ],
+                        ),
+                        SizedBox(height: 10),
                       ],
                     ),
                   ),

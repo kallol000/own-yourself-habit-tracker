@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
@@ -63,11 +64,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Own Yourself'),
+        title: Container(child: Text("Mindful Habits")),
+
         backgroundColor: Colors.transparent,
         titleTextStyle: TextStyle(
           fontSize: 24,
-          fontWeight: FontWeight.bold,
+          fontFamily: GoogleFonts.nunito().fontFamily,
           color: AppColors.surfaceColor,
         ),
       ),

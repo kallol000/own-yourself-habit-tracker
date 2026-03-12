@@ -14,6 +14,10 @@ class HabitDetailsPage extends StatefulWidget {
 
 class _HabitDetailsPageState extends State<HabitDetailsPage> {
   late final AppDatabase db;
+  DateTime _focusedDay = DateTime.now();
+
+  // Use a ValueNotifier to track logged days independently of the StreamBuilder
+  final ValueNotifier<Set<String>> _loggedDaysNotifier = ValueNotifier({});
 
   Set<String> highlightedDays = {};
 
@@ -30,6 +34,7 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
 
       body: StreamBuilder(
         stream: db.watchHabitWithLogsById(widget.habitId),
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -39,8 +44,15 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
             return Center(child: Text('No data found'));
           }
 
+          // Update the notifier whenever the stream sends new data
+          // We do this in a post-frame callback to avoid "setState during build" errors
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _loggedDaysNotifier.value = snapshot.data!.logs
+                .map((log) => DateTime.parse(log.completedAt).toIso8601String())
+                .toSet();
+          });
+
           final habitWithLogs = snapshot.data!;
-          print(habitWithLogs.habit.habitRepetitionTimes);
 
           highlightedDays = habitWithLogs.logs
               .map((log) => DateTime.parse(log.completedAt).toIso8601String())
@@ -138,123 +150,250 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
                     ),
                   ],
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TableCalendar(
-                    headerStyle: HeaderStyle(
-                      titleTextStyle: TextStyle(
-                        color: AppColors.surfaceColor,
-                        fontSize: 18,
-                        // fontWeight: FontWeight.bold,
-                      ),
-                      formatButtonVisible: false,
-                      leftChevronIcon: Icon(
-                        Icons.chevron_left,
-                        color: AppColors.surfaceColor,
-                      ),
-                      rightChevronIcon: Icon(
-                        Icons.chevron_right,
-                        color: AppColors.surfaceColor,
-                      ),
-                    ),
-                    calendarStyle: CalendarStyle(
-                      defaultTextStyle: TextStyle(
-                        color: AppColors.surfaceColor.withAlpha(200),
-                      ),
-                      weekendTextStyle: TextStyle(
-                        color: AppColors.surfaceColor.withAlpha(200),
-                      ),
-                      outsideTextStyle: TextStyle(
-                        color: AppColors.surfaceColor.withAlpha(100),
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: AppColors.accentColor,
-                        shape: BoxShape.circle,
-                      ),
-                      todayDecoration: BoxDecoration(
-                        color: AppColors.accentColor.withAlpha(100),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    firstDay: DateTime.utc(2010, 10, 16),
-                    lastDay: DateTime.utc(2030, 3, 14),
-                    focusedDay: DateTime.now(),
-                    selectedDayPredicate: (day) {
-                      // print(day);
-                      return highlightedDays.contains(
-                        DateTime(
-                          day.year,
-                          day.month,
-                          day.day,
-                        ).toIso8601String(),
-                      );
-                      // return true;
-                    },
-                    onDaySelected: (selectedDay, focusedDay) async {
-                      final normalizedSelectedDay = DateTime(
-                        selectedDay.year,
-                        selectedDay.month,
-                        selectedDay.day,
-                      ).toIso8601String();
-                      if (highlightedDays.contains(normalizedSelectedDay)) {
-                        highlightedDays.remove(normalizedSelectedDay);
-                      } else {
-                        highlightedDays.add(normalizedSelectedDay);
-                      }
-                      await db.toggleHabitLog(widget.habitId, selectedDay);
+                _buildOptimizedCalendar(),
+                // Container(
+                //   decoration: BoxDecoration(
+                //     color: AppColors.surfaceColor.withAlpha(20),
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   child: TableCalendar(
+                //     headerStyle: HeaderStyle(
+                //       titleTextStyle: TextStyle(
+                //         color: AppColors.surfaceColor,
+                //         fontSize: 18,
+                //         // fontWeight: FontWeight.bold,
+                //       ),
+                //       formatButtonVisible: false,
+                //       leftChevronIcon: Icon(
+                //         Icons.chevron_left,
+                //         color: AppColors.surfaceColor,
+                //       ),
+                //       rightChevronIcon: Icon(
+                //         Icons.chevron_right,
+                //         color: AppColors.surfaceColor,
+                //       ),
+                //     ),
+                //     calendarStyle: CalendarStyle(
+                //       defaultTextStyle: TextStyle(
+                //         color: AppColors.surfaceColor.withAlpha(200),
+                //       ),
+                //       weekendTextStyle: TextStyle(
+                //         color: AppColors.surfaceColor.withAlpha(200),
+                //       ),
+                //       outsideTextStyle: TextStyle(
+                //         color: AppColors.surfaceColor.withAlpha(100),
+                //       ),
+                //       selectedDecoration: BoxDecoration(
+                //         color: AppColors.accentColor,
+                //         shape: BoxShape.circle,
+                //       ),
+                //       todayDecoration: BoxDecoration(
+                //         color: AppColors.accentColor.withAlpha(100),
+                //         shape: BoxShape.circle,
+                //       ),
+                //     ),
+                //     firstDay: DateTime.utc(2010, 10, 16),
+                //     lastDay: DateTime.utc(2030, 3, 14),
+                //     focusedDay: _focusedDay,
+                //     onPageChanged: (focusedDay) {
+                //       setState(() {
+                //         _focusedDay = focusedDay;
+                //       });
+                //     },
+                //     selectedDayPredicate: (day) {
+                //       // print(day);
+                //       return highlightedDays.contains(
+                //         DateTime(
+                //           day.year,
+                //           day.month,
+                //           day.day,
+                //         ).toIso8601String(),
+                //       );
+                //       // return true;
+                //     },
+                //     onDaySelected: (selectedDay, focusedDay) async {
+                //       setState(() {
+                //         _focusedDay = focusedDay;
+                //       });
+                //       final normalizedSelectedDay = DateTime(
+                //         selectedDay.year,
+                //         selectedDay.month,
+                //         selectedDay.day,
+                //       ).toIso8601String();
+                //       if (highlightedDays.contains(normalizedSelectedDay)) {
+                //         highlightedDays.remove(normalizedSelectedDay);
+                //       } else {
+                //         highlightedDays.add(normalizedSelectedDay);
+                //       }
+                //       await db.toggleHabitLog(widget.habitId, selectedDay);
 
-                      // 3. BEST STREAK LOGIC
-                      // Get the most recent data for this specific habit
-                      final updatedData = await db.getHabitWithLogsById(
-                        widget.habitId,
-                      );
+                //       // 3. BEST STREAK LOGIC
+                //       // Get the most recent data for this specific habit
+                //       final updatedData = await db.getHabitWithLogsById(
+                //         widget.habitId,
+                //       );
 
-                      final newStreak = StreakCalculator.calculate(
-                        updatedData.habit,
-                        updatedData.logs,
-                      );
+                //       final newStreak = StreakCalculator.calculate(
+                //         updatedData.habit,
+                //         updatedData.logs,
+                //       );
 
-                      // Only update if the new streak is higher than the previous best
-                      if (newStreak > updatedData.habit.bestStreak) {
-                        await db.updateBestStreak(widget.habitId, newStreak);
-                      }
-                    },
-                    calendarBuilders: CalendarBuilders(
-                      // This custom builder only runs for specific days
-                      defaultBuilder: (context, day, focusedDay) {
-                        final normalized = DateTime(
-                          day.year,
-                          day.month,
-                          day.day,
-                        ).toIso8601String();
-                        if (highlightedDays.contains(normalized)) {
-                          return Container(
-                            margin: const EdgeInsets.all(4.0),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color:
-                                  Colors.green, // Your habit completion color
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '${day.day}',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          );
-                        }
-                        return null; // Use default styling for non-completed days
-                      },
-                    ),
-                  ),
-                ),
+                //       // Only update if the new streak is higher than the previous best
+                //       if (newStreak > updatedData.habit.bestStreak) {
+                //         await db.updateBestStreak(widget.habitId, newStreak);
+                //       }
+                //     },
+                //     calendarBuilders: CalendarBuilders(
+                //       // This custom builder only runs for specific days
+                //       defaultBuilder: (context, day, focusedDay) {
+                //         final normalized = DateTime(
+                //           day.year,
+                //           day.month,
+                //           day.day,
+                //         ).toIso8601String();
+                //         if (highlightedDays.contains(normalized)) {
+                //           return Container(
+                //             margin: const EdgeInsets.all(4.0),
+                //             alignment: Alignment.center,
+                //             decoration: BoxDecoration(
+                //               color:
+                //                   Colors.green, // Your habit completion color
+                //               shape: BoxShape.circle,
+                //             ),
+                //             child: Text(
+                //               '${day.day}',
+                //               style: TextStyle(color: Colors.white),
+                //             ),
+                //           );
+                //         }
+                //         return null; // Use default styling for non-completed days
+                //       },
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildOptimizedCalendar() {
+    return ValueListenableBuilder(
+      valueListenable: _loggedDaysNotifier,
+      builder: (context, _loggedDays, child) {
+        return TableCalendar(
+          headerStyle: HeaderStyle(
+            titleTextStyle: TextStyle(
+              color: AppColors.surfaceColor,
+              fontSize: 18,
+              // fontWeight: FontWeight.bold,
+            ),
+            formatButtonVisible: false,
+            leftChevronIcon: Icon(
+              Icons.chevron_left,
+              color: AppColors.surfaceColor,
+            ),
+            rightChevronIcon: Icon(
+              Icons.chevron_right,
+              color: AppColors.surfaceColor,
+            ),
+          ),
+          calendarStyle: CalendarStyle(
+            defaultTextStyle: TextStyle(
+              color: AppColors.surfaceColor.withAlpha(200),
+            ),
+            weekendTextStyle: TextStyle(
+              color: AppColors.surfaceColor.withAlpha(200),
+            ),
+            outsideTextStyle: TextStyle(
+              color: AppColors.surfaceColor.withAlpha(100),
+            ),
+            selectedDecoration: BoxDecoration(
+              color: AppColors.accentColor,
+              shape: BoxShape.circle,
+            ),
+            todayDecoration: BoxDecoration(
+              color: AppColors.accentColor.withAlpha(100),
+              shape: BoxShape.circle,
+            ),
+          ),
+          firstDay: DateTime.utc(2010, 10, 16),
+          lastDay: DateTime.utc(2030, 3, 14),
+          focusedDay: _focusedDay,
+          onPageChanged: (focusedDay) {
+            setState(() {
+              _focusedDay = focusedDay;
+            });
+          },
+          selectedDayPredicate: (day) {
+            // print(day);
+            return _loggedDays.contains(
+              DateTime(day.year, day.month, day.day).toIso8601String(),
+            );
+            // return true;
+          },
+          onDaySelected: (selectedDay, focusedDay) async {
+            final dateStr = DateTime(
+              selectedDay.year,
+              selectedDay.month,
+              selectedDay.day,
+            ).toIso8601String();
+            final currentSet = Set<String>.from(_loggedDaysNotifier.value);
+
+            if (currentSet.contains(dateStr)) {
+              currentSet.remove(dateStr);
+            } else {
+              currentSet.add(dateStr);
+            }
+            _loggedDaysNotifier.value = currentSet;
+            _focusedDay = focusedDay;
+
+            // 2. Background DB update
+            await db.toggleHabitLog(widget.habitId, selectedDay);
+
+            // 3. BEST STREAK LOGIC
+            // Get the most recent data for this specific habit
+            final updatedData = await db.getHabitWithLogsById(widget.habitId);
+
+            final newStreak = StreakCalculator.calculate(
+              updatedData.habit,
+              updatedData.logs,
+            );
+
+            // Only update if the new streak is higher than the previous best
+            if (newStreak > updatedData.habit.bestStreak) {
+              await db.updateBestStreak(widget.habitId, newStreak);
+            }
+          },
+          calendarBuilders: CalendarBuilders(
+            // This custom builder only runs for specific days
+            defaultBuilder: (context, day, focusedDay) {
+              final normalized = DateTime(
+                day.year,
+                day.month,
+                day.day,
+              ).toIso8601String();
+              if (highlightedDays.contains(normalized)) {
+                return Container(
+                  margin: const EdgeInsets.all(4.0),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.green, // Your habit completion color
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${day.day}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
+              }
+              return null; // Use default styling for non-completed days
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -32,7 +32,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           // Provide a background color for the popup.
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: Colors.transparent,
           // Use a SafeArea widget to avoid system overlaps.
           child: SafeArea(top: false, child: child),
         );
@@ -52,7 +52,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           // Provide a background color for the popup.
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: Colors.transparent,
           // Use a SafeArea widget to avoid system overlaps.
           child: SafeArea(top: false, child: child),
         );
@@ -138,6 +138,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
                         onPressed: () {
                           return showRepetitionTimesPicker(
                             CupertinoPicker(
+                              backgroundColor: Colors.transparent,
                               scrollController: FixedExtentScrollController(
                                 initialItem: selectedRepetitionTimes,
                               ),
@@ -147,10 +148,18 @@ class _NewHabitFormState extends State<NewHabitForm> {
                                   selectedRepetitionTimes = value;
                                 });
                               },
-                              children: habitTimeOptions(
-                                HabitRepetitionType
-                                    .values[selectedRepetitionType],
-                              ).map((e) => Text(e.toString())).toList(),
+                              children:
+                                  habitTimeOptions(
+                                        HabitRepetitionType
+                                            .values[selectedRepetitionType],
+                                      )
+                                      .map(
+                                        (e) => Text(
+                                          e.toString(),
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      )
+                                      .toList(),
                             ),
                           );
                         },
@@ -179,6 +188,8 @@ class _NewHabitFormState extends State<NewHabitForm> {
                       onPressed: () {
                         return showRepetitionTypePicker(
                           CupertinoPicker(
+                            backgroundColor: Colors.transparent,
+
                             scrollController: FixedExtentScrollController(
                               initialItem: selectedRepetitionType,
                             ),
@@ -189,7 +200,12 @@ class _NewHabitFormState extends State<NewHabitForm> {
                               });
                             },
                             children: [...HabitRepetitionType.values]
-                                .map((e) => Text(e.toString().split('.').last))
+                                .map(
+                                  (e) => Text(
+                                    e.toString().split('.').last,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
                                 .toList(),
                           ),
                         );
@@ -208,7 +224,9 @@ class _NewHabitFormState extends State<NewHabitForm> {
                   child: FilledButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(
-                        AppColors.accentColor.withAlpha(200),
+                        habitNameController.text.trim().isEmpty
+                            ? AppColors.surfaceColor
+                            : AppColors.accentColor.withAlpha(200),
                       ),
                       textStyle: WidgetStateProperty.all(
                         TextStyle(
@@ -219,6 +237,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
                       ),
                     ),
                     onPressed: () {
+                      if (habitNameController.text.trim().isEmpty) return;
                       var newHabit = HabitEntity(
                         // id: Uuid().v4(),
                         title: habitNameController.text,

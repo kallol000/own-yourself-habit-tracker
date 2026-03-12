@@ -45,6 +45,7 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
         fillColor: AppColors.surfaceColor.withAlpha(50),
         selectedColor: AppColors.accentColor,
         borderRadius: BorderRadius.circular(5),
+        
         splashColor: Colors.white.withAlpha(50),
         textStyle: TextStyle(color: AppColors.surfaceColor, fontSize: 12),
 

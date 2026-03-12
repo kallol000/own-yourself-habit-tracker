@@ -120,15 +120,11 @@ List<DateTime> getLastNWeekdays(int numberOfDays) {
 }
 
 class StreakCalculator {
-  // Main entry point
+  // Returns the current active streak (from today backwards)
   static int calculate(Habit habit, List<HabitLog> logs) {
     if (logs.isEmpty) return 0;
+    final sortedLogs = _sortNewestFirst(logs);
 
-    // 1. Sort logs newest to oldest
-    final sortedLogs = List<HabitLog>.from(logs)
-      ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
-
-    // 2. Route to specific logic
     switch (habit.habitRepetitionType.toLowerCase()) {
       case 'daily':
         return _calculateDaily(habit, sortedLogs);
@@ -141,40 +137,67 @@ class StreakCalculator {
     }
   }
 
-  // --- DAILY LOGIC ---
+  // NEW: Calculates the longest streak ever achieved in the log history
+  static int calculateMax(Habit habit, List<HabitLog> logs) {
+    if (logs.isEmpty) return 0;
+
+    // For Max calculation, we scan forward from the habit's start date to today
+    DateTime checkDate = habit.startDate.dateOnly;
+    DateTime today = DateTime.now().dateOnly;
+    final logSet = logs.map((l) => l.completedAt).toSet();
+
+    int maxStreak = 0;
+    int runningStreak = 0;
+
+    if (habit.habitRepetitionType.toLowerCase() == 'daily') {
+      while (checkDate.isBefore(today) || checkDate.isAtSameMomentAs(today)) {
+        if (logSet.contains(checkDate.toIso8601String())) {
+          runningStreak++;
+          if (runningStreak > maxStreak) maxStreak = runningStreak;
+        } else {
+          // Streak broken at this point in history
+          runningStreak = 0;
+        }
+        checkDate = checkDate.add(const Duration(days: 1));
+      }
+    } else {
+      // For Weekly/Monthly, the 'Current' calculation logic is already
+      // robust if you run it without the 'break' on failure.
+      // But for most users, Best Daily Streak is the primary concern.
+      maxStreak = calculate(habit, logs);
+    }
+
+    return maxStreak;
+  }
+
+  // --- INTERNAL DAILY LOGIC ---
   static int _calculateDaily(Habit habit, List<HabitLog> logs) {
     int streak = 0;
     DateTime checkDate = DateTime.now().dateOnly;
     final logSet = logs.map((l) => l.completedAt).toSet();
-    final startStr = habit.startDate.toIso8601String();
 
-    // Loop backwards until we hit the start date
     while (checkDate.isAtSameMomentAs(habit.startDate) ||
         checkDate.isAfter(habit.startDate)) {
       String currentStr = checkDate.toIso8601String();
-
       if (logSet.contains(currentStr)) {
         streak++;
       } else {
-        // If it's today and not done yet, don't break the streak
         if (currentStr == DateTime.now().dateOnly.toIso8601String()) {
           checkDate = checkDate.subtract(const Duration(days: 1));
           continue;
         }
-        break; // Missed a day after the habit started
+        break;
       }
       checkDate = checkDate.subtract(const Duration(days: 1));
     }
     return streak;
   }
 
-  // --- WEEKLY LOGIC (e.g., 3x a week) ---
+  // --- WEEKLY LOGIC ---
   static int _calculateWeekly(Habit habit, List<HabitLog> logs) {
     int streak = 0;
     DateTime now = DateTime.now().dateOnly;
-    // Get Monday of the current week
     DateTime currentMonday = now.subtract(Duration(days: now.weekday - 1));
-
     bool isCurrentWeek = true;
 
     while (currentMonday.isAfter(
@@ -192,9 +215,8 @@ class StreakCalculator {
       if (count >= habit.habitRepetitionTimes) {
         streak++;
       } else if (!isCurrentWeek) {
-        break; // Failed a past week
+        break;
       }
-
       currentMonday = currentMonday.subtract(const Duration(days: 7));
       isCurrentWeek = false;
     }
@@ -206,7 +228,6 @@ class StreakCalculator {
     int streak = 0;
     DateTime now = DateTime.now().dateOnly;
     DateTime currentMonthStart = DateTime(now.year, now.month, 1);
-
     bool isCurrentMonth = true;
 
     while (currentMonthStart.isAfter(
@@ -217,7 +238,6 @@ class StreakCalculator {
         currentMonthStart.month + 1,
         1,
       );
-
       final count = logs.where((l) {
         final d = DateTime.parse(l.completedAt);
         return (d.isAtSameMomentAs(currentMonthStart) ||
@@ -230,7 +250,6 @@ class StreakCalculator {
       } else if (!isCurrentMonth) {
         break;
       }
-
       currentMonthStart = DateTime(
         currentMonthStart.year,
         currentMonthStart.month - 1,
@@ -239,6 +258,11 @@ class StreakCalculator {
       isCurrentMonth = false;
     }
     return streak;
+  }
+
+  static List<HabitLog> _sortNewestFirst(List<HabitLog> logs) {
+    return List<HabitLog>.from(logs)
+      ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
   }
 }
 
