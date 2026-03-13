@@ -4,6 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
+import 'package:own_yourself/utils/types.dart';
 import 'package:own_yourself/widgets/card_segment_button.dart';
 import 'package:own_yourself/widgets/confirmation_popup.dart';
 import 'package:own_yourself/pages/habit_details_page.dart';
@@ -12,6 +13,8 @@ import 'package:gradient_borders/gradient_borders.dart';
 class HabitCard extends StatefulWidget {
   final int habitId;
   final String title;
+  final int currentStreak;
+  final String habitRepetitionType;
   final Future<void> Function(int id) deleteExistingHabit;
   final Future<void> Function(int habitId, DateTime date) toggleHabitLog;
   final List<HabitLog> habitLogs;
@@ -21,8 +24,10 @@ class HabitCard extends StatefulWidget {
     required this.title,
     required this.deleteExistingHabit,
     required this.habitId,
+    required this.currentStreak,
     required this.toggleHabitLog,
     required this.habitLogs,
+    required this.habitRepetitionType,
   });
 
   @override
@@ -155,7 +160,11 @@ class _HabitCardState extends State<HabitCard>
                                     ),
                                   ),
                                   Text(
-                                    "12 day streak", // TODO: Calculate this dynamically
+                                    '${widget.currentStreak} ${widget.habitRepetitionType == 'daily'
+                                        ? 'day'
+                                        : widget.habitRepetitionType == 'weekly'
+                                        ? 'week'
+                                        : 'month'} streak', // TODO: Calculate this dynamically
                                     style: TextStyle(
                                       color: AppColors.surfaceColor.withAlpha(
                                         150,

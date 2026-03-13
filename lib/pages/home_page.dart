@@ -56,6 +56,15 @@ class _HomePageState extends State<HomePage> {
 
   // This is called when user clicks the day for a habit on a specific day
   Future<void> toggleHabitLog(int habitId, DateTime date) async {
+    final updatedData = await db.getHabitWithLogsById(habitId);
+
+    final newStreak = StreakCalculator.calculate(
+      updatedData.habit,
+      updatedData.logs,
+    );
+
+    await db.updateCurrentStreak(habitId, newStreak);
+
     await db.toggleHabitLog(habitId, date);
   }
 
@@ -94,16 +103,16 @@ class _HomePageState extends State<HomePage> {
 
           final habitsWithLogs = snapshot.data!;
 
-          // final fullData = habitsWithLogs
-          //     .map(
-          //       (item) => {
-          //         'habit': item.habit.toJson(),
-          //         'logs': item.logs.map((log) => log.toJson()).toList(),
-          //       },
-          //     )
-          //     .toList();
+          final fullData = habitsWithLogs
+              .map(
+                (item) => {
+                  'habit': item.habit.toJson(),
+                  'logs': item.logs.map((log) => log.toJson()).toList(),
+                },
+              )
+              .toList();
 
-          // print(fullData);
+          print(fullData);
 
           if (habitsWithLogs.isEmpty) {
             // getLastSevenDays();
@@ -123,6 +132,8 @@ class _HomePageState extends State<HomePage> {
                   deleteExistingHabit: deleteExistingHabit,
                   toggleHabitLog: toggleHabitLog,
                   habitLogs: habitWithLogs.logs,
+                  currentStreak: habitWithLogs.habit.currentStreak,
+                  habitRepetitionType: habitWithLogs.habit.habitRepetitionType,
                 );
               },
             ),

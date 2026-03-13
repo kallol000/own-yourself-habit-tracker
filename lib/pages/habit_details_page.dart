@@ -243,6 +243,8 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
               updatedData.logs,
             );
 
+            await db.updateCurrentStreak(widget.habitId, newStreak);
+
             // Only update if the new streak is higher than the previous best
             if (newStreak > updatedData.habit.bestStreak) {
               await db.updateBestStreak(widget.habitId, newStreak);

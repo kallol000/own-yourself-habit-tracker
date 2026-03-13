@@ -68,6 +68,7 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
             .toList(),
         onPressed: (index) {
           widget.toggleHabitLog!(widget.habitId, widget.days[index]);
+          
           // print(weekdaysLogged);
         },
       ),

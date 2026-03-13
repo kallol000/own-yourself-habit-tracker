@@ -45,12 +45,8 @@ class AppDatabase extends _$AppDatabase {
 
   Future<HabitWithLogs> getHabitWithLogsById(int habitId) async {
     final query = select(habits).join([
-      leftOuterJoin(
-        habitLogs,
-        habitLogs.habitId.equalsExp(habits.id),
-      ),
-    ])
-      ..where(habits.id.equals(habitId));
+      leftOuterJoin(habitLogs, habitLogs.habitId.equalsExp(habits.id)),
+    ])..where(habits.id.equals(habitId));
 
     final rows = await query.get();
 
@@ -63,17 +59,25 @@ class AppDatabase extends _$AppDatabase {
     return HabitWithLogs(habit: habit, logs: logs);
   }
 
-  Future<void> updateBestStreak(int habitId, int currentStreak) async {
-  // 1. Fetch the existing habit
-  final habit = await (select(habits)..where((t) => t.id.equals(habitId))).getSingle();
-  
-  // 2. Only update if the new streak is higher
-  if (currentStreak > habit.bestStreak) {
+  Future<void> updateCurrentStreak(int habitId, int currentStreak) async {
     await (update(habits)..where((t) => t.id.equals(habitId))).write(
-      HabitsCompanion(bestStreak: Value(currentStreak)),
+      HabitsCompanion(currentStreak: Value(currentStreak)),
     );
   }
-}
+
+  Future<void> updateBestStreak(int habitId, int currentStreak) async {
+    // 1. Fetch the existing habit
+    final habit = await (select(
+      habits,
+    )..where((t) => t.id.equals(habitId))).getSingle();
+
+    // 2. Only update if the new streak is higher
+    if (currentStreak > habit.bestStreak) {
+      await (update(habits)..where((t) => t.id.equals(habitId))).write(
+        HabitsCompanion(bestStreak: Value(currentStreak)),
+      );
+    }
+  }
 
   Stream<Habit> watchHabitById(int id) {
     return (select(habits)..where((h) => h.id.equals(id))).watchSingle();
@@ -164,12 +168,8 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<HabitWithLogs> watchHabitWithLogsById(int habitId) {
     final query = select(habits).join([
-      leftOuterJoin(
-        habitLogs,
-        habitLogs.habitId.equalsExp(habits.id),
-      ),
-    ])
-      ..where(habits.id.equals(habitId));
+      leftOuterJoin(habitLogs, habitLogs.habitId.equalsExp(habits.id)),
+    ])..where(habits.id.equals(habitId));
 
     return query.watch().map((rows) {
       final habit = rows.first.readTable(habits);

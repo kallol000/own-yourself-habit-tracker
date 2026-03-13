@@ -14,5 +14,7 @@ class Habits extends Table {
 
   IntColumn get bestStreak => integer().withDefault(const Constant(0))();
 
+  IntColumn get currentStreak => integer().withDefault(const Constant(0))();
+
   TextColumn get endDate => text().map(const DateTimeConverter()).nullable()();
 }

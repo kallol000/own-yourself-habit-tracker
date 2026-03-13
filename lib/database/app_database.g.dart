@@ -72,6 +72,18 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _currentStreakMeta = const VerificationMeta(
+    'currentStreak',
+  );
+  @override
+  late final GeneratedColumn<int> currentStreak = GeneratedColumn<int>(
+    'current_streak',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   late final GeneratedColumnWithTypeConverter<DateTime?, String> endDate =
       GeneratedColumn<String>(
@@ -89,6 +101,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
     habitRepetitionTimes,
     startDate,
     bestStreak,
+    currentStreak,
     endDate,
   ];
   @override
@@ -142,6 +155,15 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
         bestStreak.isAcceptableOrUnknown(data['best_streak']!, _bestStreakMeta),
       );
     }
+    if (data.containsKey('current_streak')) {
+      context.handle(
+        _currentStreakMeta,
+        currentStreak.isAcceptableOrUnknown(
+          data['current_streak']!,
+          _currentStreakMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -177,6 +199,10 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
         DriftSqlType.int,
         data['${effectivePrefix}best_streak'],
       )!,
+      currentStreak: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_streak'],
+      )!,
       endDate: $HabitsTable.$converterendDaten.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -206,6 +232,7 @@ class Habit extends DataClass implements Insertable<Habit> {
   final int habitRepetitionTimes;
   final DateTime startDate;
   final int bestStreak;
+  final int currentStreak;
   final DateTime? endDate;
   const Habit({
     required this.id,
@@ -214,6 +241,7 @@ class Habit extends DataClass implements Insertable<Habit> {
     required this.habitRepetitionTimes,
     required this.startDate,
     required this.bestStreak,
+    required this.currentStreak,
     this.endDate,
   });
   @override
@@ -229,6 +257,7 @@ class Habit extends DataClass implements Insertable<Habit> {
       );
     }
     map['best_streak'] = Variable<int>(bestStreak);
+    map['current_streak'] = Variable<int>(currentStreak);
     if (!nullToAbsent || endDate != null) {
       map['end_date'] = Variable<String>(
         $HabitsTable.$converterendDaten.toSql(endDate),
@@ -245,6 +274,7 @@ class Habit extends DataClass implements Insertable<Habit> {
       habitRepetitionTimes: Value(habitRepetitionTimes),
       startDate: Value(startDate),
       bestStreak: Value(bestStreak),
+      currentStreak: Value(currentStreak),
       endDate: endDate == null && nullToAbsent
           ? const Value.absent()
           : Value(endDate),
@@ -267,6 +297,7 @@ class Habit extends DataClass implements Insertable<Habit> {
       ),
       startDate: serializer.fromJson<DateTime>(json['startDate']),
       bestStreak: serializer.fromJson<int>(json['bestStreak']),
+      currentStreak: serializer.fromJson<int>(json['currentStreak']),
       endDate: serializer.fromJson<DateTime?>(json['endDate']),
     );
   }
@@ -280,6 +311,7 @@ class Habit extends DataClass implements Insertable<Habit> {
       'habitRepetitionTimes': serializer.toJson<int>(habitRepetitionTimes),
       'startDate': serializer.toJson<DateTime>(startDate),
       'bestStreak': serializer.toJson<int>(bestStreak),
+      'currentStreak': serializer.toJson<int>(currentStreak),
       'endDate': serializer.toJson<DateTime?>(endDate),
     };
   }
@@ -291,6 +323,7 @@ class Habit extends DataClass implements Insertable<Habit> {
     int? habitRepetitionTimes,
     DateTime? startDate,
     int? bestStreak,
+    int? currentStreak,
     Value<DateTime?> endDate = const Value.absent(),
   }) => Habit(
     id: id ?? this.id,
@@ -299,6 +332,7 @@ class Habit extends DataClass implements Insertable<Habit> {
     habitRepetitionTimes: habitRepetitionTimes ?? this.habitRepetitionTimes,
     startDate: startDate ?? this.startDate,
     bestStreak: bestStreak ?? this.bestStreak,
+    currentStreak: currentStreak ?? this.currentStreak,
     endDate: endDate.present ? endDate.value : this.endDate,
   );
   Habit copyWithCompanion(HabitsCompanion data) {
@@ -315,6 +349,9 @@ class Habit extends DataClass implements Insertable<Habit> {
       bestStreak: data.bestStreak.present
           ? data.bestStreak.value
           : this.bestStreak,
+      currentStreak: data.currentStreak.present
+          ? data.currentStreak.value
+          : this.currentStreak,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
     );
   }
@@ -328,6 +365,7 @@ class Habit extends DataClass implements Insertable<Habit> {
           ..write('habitRepetitionTimes: $habitRepetitionTimes, ')
           ..write('startDate: $startDate, ')
           ..write('bestStreak: $bestStreak, ')
+          ..write('currentStreak: $currentStreak, ')
           ..write('endDate: $endDate')
           ..write(')'))
         .toString();
@@ -341,6 +379,7 @@ class Habit extends DataClass implements Insertable<Habit> {
     habitRepetitionTimes,
     startDate,
     bestStreak,
+    currentStreak,
     endDate,
   );
   @override
@@ -353,6 +392,7 @@ class Habit extends DataClass implements Insertable<Habit> {
           other.habitRepetitionTimes == this.habitRepetitionTimes &&
           other.startDate == this.startDate &&
           other.bestStreak == this.bestStreak &&
+          other.currentStreak == this.currentStreak &&
           other.endDate == this.endDate);
 }
 
@@ -363,6 +403,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
   final Value<int> habitRepetitionTimes;
   final Value<DateTime> startDate;
   final Value<int> bestStreak;
+  final Value<int> currentStreak;
   final Value<DateTime?> endDate;
   const HabitsCompanion({
     this.id = const Value.absent(),
@@ -371,6 +412,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
     this.habitRepetitionTimes = const Value.absent(),
     this.startDate = const Value.absent(),
     this.bestStreak = const Value.absent(),
+    this.currentStreak = const Value.absent(),
     this.endDate = const Value.absent(),
   });
   HabitsCompanion.insert({
@@ -380,6 +422,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
     required int habitRepetitionTimes,
     required DateTime startDate,
     this.bestStreak = const Value.absent(),
+    this.currentStreak = const Value.absent(),
     this.endDate = const Value.absent(),
   }) : title = Value(title),
        habitRepetitionType = Value(habitRepetitionType),
@@ -392,6 +435,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
     Expression<int>? habitRepetitionTimes,
     Expression<String>? startDate,
     Expression<int>? bestStreak,
+    Expression<int>? currentStreak,
     Expression<String>? endDate,
   }) {
     return RawValuesInsertable({
@@ -403,6 +447,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
         'habit_repetition_times': habitRepetitionTimes,
       if (startDate != null) 'start_date': startDate,
       if (bestStreak != null) 'best_streak': bestStreak,
+      if (currentStreak != null) 'current_streak': currentStreak,
       if (endDate != null) 'end_date': endDate,
     });
   }
@@ -414,6 +459,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
     Value<int>? habitRepetitionTimes,
     Value<DateTime>? startDate,
     Value<int>? bestStreak,
+    Value<int>? currentStreak,
     Value<DateTime?>? endDate,
   }) {
     return HabitsCompanion(
@@ -423,6 +469,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
       habitRepetitionTimes: habitRepetitionTimes ?? this.habitRepetitionTimes,
       startDate: startDate ?? this.startDate,
       bestStreak: bestStreak ?? this.bestStreak,
+      currentStreak: currentStreak ?? this.currentStreak,
       endDate: endDate ?? this.endDate,
     );
   }
@@ -452,6 +499,9 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
     if (bestStreak.present) {
       map['best_streak'] = Variable<int>(bestStreak.value);
     }
+    if (currentStreak.present) {
+      map['current_streak'] = Variable<int>(currentStreak.value);
+    }
     if (endDate.present) {
       map['end_date'] = Variable<String>(
         $HabitsTable.$converterendDaten.toSql(endDate.value),
@@ -469,6 +519,7 @@ class HabitsCompanion extends UpdateCompanion<Habit> {
           ..write('habitRepetitionTimes: $habitRepetitionTimes, ')
           ..write('startDate: $startDate, ')
           ..write('bestStreak: $bestStreak, ')
+          ..write('currentStreak: $currentStreak, ')
           ..write('endDate: $endDate')
           ..write(')'))
         .toString();
@@ -852,6 +903,7 @@ typedef $$HabitsTableCreateCompanionBuilder =
       required int habitRepetitionTimes,
       required DateTime startDate,
       Value<int> bestStreak,
+      Value<int> currentStreak,
       Value<DateTime?> endDate,
     });
 typedef $$HabitsTableUpdateCompanionBuilder =
@@ -862,6 +914,7 @@ typedef $$HabitsTableUpdateCompanionBuilder =
       Value<int> habitRepetitionTimes,
       Value<DateTime> startDate,
       Value<int> bestStreak,
+      Value<int> currentStreak,
       Value<DateTime?> endDate,
     });
 
@@ -925,6 +978,11 @@ class $$HabitsTableFilterComposer
 
   ColumnFilters<int> get bestStreak => $composableBuilder(
     column: $table.bestStreak,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -999,6 +1057,11 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get endDate => $composableBuilder(
     column: $table.endDate,
     builder: (column) => ColumnOrderings(column),
@@ -1035,6 +1098,11 @@ class $$HabitsTableAnnotationComposer
 
   GeneratedColumn<int> get bestStreak => $composableBuilder(
     column: $table.bestStreak,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
     builder: (column) => column,
   );
 
@@ -1101,6 +1169,7 @@ class $$HabitsTableTableManager
                 Value<int> habitRepetitionTimes = const Value.absent(),
                 Value<DateTime> startDate = const Value.absent(),
                 Value<int> bestStreak = const Value.absent(),
+                Value<int> currentStreak = const Value.absent(),
                 Value<DateTime?> endDate = const Value.absent(),
               }) => HabitsCompanion(
                 id: id,
@@ -1109,6 +1178,7 @@ class $$HabitsTableTableManager
                 habitRepetitionTimes: habitRepetitionTimes,
                 startDate: startDate,
                 bestStreak: bestStreak,
+                currentStreak: currentStreak,
                 endDate: endDate,
               ),
           createCompanionCallback:
@@ -1119,6 +1189,7 @@ class $$HabitsTableTableManager
                 required int habitRepetitionTimes,
                 required DateTime startDate,
                 Value<int> bestStreak = const Value.absent(),
+                Value<int> currentStreak = const Value.absent(),
                 Value<DateTime?> endDate = const Value.absent(),
               }) => HabitsCompanion.insert(
                 id: id,
@@ -1127,6 +1198,7 @@ class $$HabitsTableTableManager
                 habitRepetitionTimes: habitRepetitionTimes,
                 startDate: startDate,
                 bestStreak: bestStreak,
+                currentStreak: currentStreak,
                 endDate: endDate,
               ),
           withReferenceMapper: (p0) => p0
