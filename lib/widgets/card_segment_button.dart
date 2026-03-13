@@ -45,7 +45,7 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
         fillColor: AppColors.surfaceColor.withAlpha(50),
         selectedColor: AppColors.accentColor,
         borderRadius: BorderRadius.circular(5),
-        
+
         splashColor: Colors.white.withAlpha(50),
         textStyle: TextStyle(color: AppColors.surfaceColor, fontSize: 12),
 
@@ -56,24 +56,11 @@ class _CardSegmentButtonState extends State<CardSegmentButton> {
         children: widget.days
             .map(
               (day) => Container(
-                // alignment: Alignment.center,
-                // constraints: const BoxConstraints(minWidth: 40, maxHeight: ),
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(2),
-                //   // Apply gradient only if the button is selected
-                //   gradient: currentSelection[day.weekday - 1]
-                //       ? const LinearGradient(
-                //           colors: GradientColors.eternalConstance,
-                //           begin: Alignment.topLeft,
-                //           end: Alignment.bottomRight,
-                //         )
-                //       : null,
-                // ),
                 child: Text(
                   weekdayMap[day.weekday]!,
                   style: TextStyle(
                     // color: AppColors.surfaceColor,
-                    fontWeight: FontWeight.w100,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),

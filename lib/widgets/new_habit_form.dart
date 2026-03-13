@@ -20,6 +20,16 @@ class _NewHabitFormState extends State<NewHabitForm> {
   int selectedRepetitionType = 0;
   int selectedRepetitionTimes = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // This forces the widget to rebuild as you type,
+    // enabling the "Start" button color logic
+    habitNameController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() => setState(() {});
+
   void showRepetitionTypePicker(Widget child) {
     showCupertinoModalPopup(
       context: context,
@@ -32,7 +42,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           // Provide a background color for the popup.
-          color: Colors.transparent,
+          color: AppColors.backgroundColor,
           // Use a SafeArea widget to avoid system overlaps.
           child: SafeArea(top: false, child: child),
         );
@@ -52,7 +62,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           // Provide a background color for the popup.
-          color: Colors.transparent,
+          color: AppColors.backgroundColor,
           // Use a SafeArea widget to avoid system overlaps.
           child: SafeArea(top: false, child: child),
         );
@@ -69,7 +79,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
       content: Container(
         width: double.maxFinite,
         decoration: BoxDecoration(
-          color: AppColors.backgroundColor.withAlpha(200),
+          color: AppColors.backgroundColor.withAlpha(500),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Padding(
@@ -110,9 +120,9 @@ class _NewHabitFormState extends State<NewHabitForm> {
                   ),
                   filled: true,
                   fillColor: AppColors.surfaceColor.withAlpha(50),
-                  hintText: 'Excercise',
+                  hintText: 'e.g. Excercise',
                   hintStyle: TextStyle(
-                    color: AppColors.surfaceColor.withAlpha(200),
+                    color: AppColors.surfaceColor.withAlpha(100),
                   ),
                 ),
               ),
@@ -221,38 +231,40 @@ class _NewHabitFormState extends State<NewHabitForm> {
                 child: SizedBox(
                   // width: double.infinity,
                   height: 50,
-                  child: FilledButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        habitNameController.text.trim().isEmpty
-                            ? AppColors.surfaceColor
-                            : AppColors.accentColor.withAlpha(200),
-                      ),
-                      textStyle: WidgetStateProperty.all(
-                        TextStyle(
-                          color: AppColors.surfaceColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (habitNameController.text.trim().isEmpty) return;
-                      var newHabit = HabitEntity(
-                        // id: Uuid().v4(),
-                        title: habitNameController.text,
-                        repetitionType:
-                            HabitRepetitionType.values[selectedRepetitionType],
-                        repetitionTimes: selectedRepetitionType == 0
-                            ? 1
-                            : selectedRepetitionTimes + 1,
-                        startDate: DateTime.now(),
-                        endDate: DateTime(2099),
-                      );
-                      widget.submitAction(newHabit);
-                    },
-                    child: Text('Start'),
-                  ),
+                  child: !habitNameController.text.trim().isEmpty
+                      ? FilledButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                              habitNameController.text.trim().isEmpty
+                                  ? AppColors.surfaceColor
+                                  : AppColors.accentColor.withAlpha(200),
+                            ),
+                            textStyle: WidgetStateProperty.all(
+                              TextStyle(
+                                color: AppColors.surfaceColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (habitNameController.text.trim().isEmpty) return;
+                            var newHabit = HabitEntity(
+                              // id: Uuid().v4(),
+                              title: habitNameController.text,
+                              repetitionType: HabitRepetitionType
+                                  .values[selectedRepetitionType],
+                              repetitionTimes: selectedRepetitionType == 0
+                                  ? 1
+                                  : selectedRepetitionTimes + 1,
+                              startDate: DateTime.now(),
+                              endDate: DateTime(2099),
+                            );
+                            widget.submitAction(newHabit);
+                          },
+                          child: Text('Start'),
+                        )
+                      : null,
                 ),
               ),
             ],

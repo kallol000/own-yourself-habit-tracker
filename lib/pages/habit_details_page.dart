@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:own_yourself/database/app_database.dart';
 import 'package:own_yourself/utils/consts.dart';
 import 'package:own_yourself/utils/helper_functions.dart';
@@ -6,7 +7,12 @@ import 'package:table_calendar/table_calendar.dart';
 
 class HabitDetailsPage extends StatefulWidget {
   final int habitId;
-  const HabitDetailsPage({super.key, required this.habitId});
+  final String habitTitle;
+  const HabitDetailsPage({
+    super.key,
+    required this.habitId,
+    required this.habitTitle,
+  });
 
   @override
   State<HabitDetailsPage> createState() => _HabitDetailsPageState();
@@ -31,7 +37,16 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Container(child: Text(widget.habitTitle)),
 
+        backgroundColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 24,
+          fontFamily: GoogleFonts.nunito().fontFamily,
+          color: AppColors.surfaceColor,
+        ),
+      ),
       body: StreamBuilder(
         stream: db.watchHabitWithLogsById(widget.habitId),
 
@@ -73,20 +88,6 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
             child: Column(
               spacing: 16,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      habitWithLogs.habit.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w100,
-                        fontSize: 24,
-                        color: AppColors.surfaceColor,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    BackButton(),
-                  ],
-                ),
                 Row(
                   spacing: 16,
                   children: [
@@ -151,126 +152,6 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
                   ],
                 ),
                 _buildOptimizedCalendar(),
-                // Container(
-                //   decoration: BoxDecoration(
-                //     color: AppColors.surfaceColor.withAlpha(20),
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: TableCalendar(
-                //     headerStyle: HeaderStyle(
-                //       titleTextStyle: TextStyle(
-                //         color: AppColors.surfaceColor,
-                //         fontSize: 18,
-                //         // fontWeight: FontWeight.bold,
-                //       ),
-                //       formatButtonVisible: false,
-                //       leftChevronIcon: Icon(
-                //         Icons.chevron_left,
-                //         color: AppColors.surfaceColor,
-                //       ),
-                //       rightChevronIcon: Icon(
-                //         Icons.chevron_right,
-                //         color: AppColors.surfaceColor,
-                //       ),
-                //     ),
-                //     calendarStyle: CalendarStyle(
-                //       defaultTextStyle: TextStyle(
-                //         color: AppColors.surfaceColor.withAlpha(200),
-                //       ),
-                //       weekendTextStyle: TextStyle(
-                //         color: AppColors.surfaceColor.withAlpha(200),
-                //       ),
-                //       outsideTextStyle: TextStyle(
-                //         color: AppColors.surfaceColor.withAlpha(100),
-                //       ),
-                //       selectedDecoration: BoxDecoration(
-                //         color: AppColors.accentColor,
-                //         shape: BoxShape.circle,
-                //       ),
-                //       todayDecoration: BoxDecoration(
-                //         color: AppColors.accentColor.withAlpha(100),
-                //         shape: BoxShape.circle,
-                //       ),
-                //     ),
-                //     firstDay: DateTime.utc(2010, 10, 16),
-                //     lastDay: DateTime.utc(2030, 3, 14),
-                //     focusedDay: _focusedDay,
-                //     onPageChanged: (focusedDay) {
-                //       setState(() {
-                //         _focusedDay = focusedDay;
-                //       });
-                //     },
-                //     selectedDayPredicate: (day) {
-                //       // print(day);
-                //       return highlightedDays.contains(
-                //         DateTime(
-                //           day.year,
-                //           day.month,
-                //           day.day,
-                //         ).toIso8601String(),
-                //       );
-                //       // return true;
-                //     },
-                //     onDaySelected: (selectedDay, focusedDay) async {
-                //       setState(() {
-                //         _focusedDay = focusedDay;
-                //       });
-                //       final normalizedSelectedDay = DateTime(
-                //         selectedDay.year,
-                //         selectedDay.month,
-                //         selectedDay.day,
-                //       ).toIso8601String();
-                //       if (highlightedDays.contains(normalizedSelectedDay)) {
-                //         highlightedDays.remove(normalizedSelectedDay);
-                //       } else {
-                //         highlightedDays.add(normalizedSelectedDay);
-                //       }
-                //       await db.toggleHabitLog(widget.habitId, selectedDay);
-
-                //       // 3. BEST STREAK LOGIC
-                //       // Get the most recent data for this specific habit
-                //       final updatedData = await db.getHabitWithLogsById(
-                //         widget.habitId,
-                //       );
-
-                //       final newStreak = StreakCalculator.calculate(
-                //         updatedData.habit,
-                //         updatedData.logs,
-                //       );
-
-                //       // Only update if the new streak is higher than the previous best
-                //       if (newStreak > updatedData.habit.bestStreak) {
-                //         await db.updateBestStreak(widget.habitId, newStreak);
-                //       }
-                //     },
-                //     calendarBuilders: CalendarBuilders(
-                //       // This custom builder only runs for specific days
-                //       defaultBuilder: (context, day, focusedDay) {
-                //         final normalized = DateTime(
-                //           day.year,
-                //           day.month,
-                //           day.day,
-                //         ).toIso8601String();
-                //         if (highlightedDays.contains(normalized)) {
-                //           return Container(
-                //             margin: const EdgeInsets.all(4.0),
-                //             alignment: Alignment.center,
-                //             decoration: BoxDecoration(
-                //               color:
-                //                   Colors.green, // Your habit completion color
-                //               shape: BoxShape.circle,
-                //             ),
-                //             child: Text(
-                //               '${day.day}',
-                //               style: TextStyle(color: Colors.white),
-                //             ),
-                //           );
-                //         }
-                //         return null; // Use default styling for non-completed days
-                //       },
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           );

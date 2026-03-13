@@ -100,7 +100,10 @@ class _HabitCardState extends State<HabitCard>
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HabitDetailsPage(habitId: widget.habitId),
+                builder: (context) => HabitDetailsPage(
+                  habitId: widget.habitId,
+                  habitTitle: widget.title,
+                ),
               ),
             ),
             child: Stack(
@@ -118,9 +121,11 @@ class _HabitCardState extends State<HabitCard>
                 // 3. CONTENT
                 ListTile(
                   tileColor: Colors.transparent,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
+                  contentPadding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 4,
+                    // vertical: 4,
                   ),
                   title: Padding(
                     padding: const EdgeInsets.only(bottom: 0.0),
@@ -167,7 +172,7 @@ class _HabitCardState extends State<HabitCard>
                             
                           ],
                         ),
-                        SizedBox(height: 10),
+                        // SizedBox(height: 10),
                       ],
                     ),
                   ),
